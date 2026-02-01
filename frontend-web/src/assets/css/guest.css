@@ -1,0 +1,130 @@
+/* --- HERO SECTION (PHẦN TÌM KIẾM TO) --- */
+.hero-section {
+    /* Ảnh nền rừng cây chất lượng cao từ Unsplash */
+    background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 60vh;
+    /* Chiếm 60% chiều cao màn hình */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Lớp phủ màu đen mờ để chữ trắng nổi bật trên nền ảnh */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    /* Nằm trên lớp phủ */
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Thanh tìm kiếm to ở trang chủ */
+.hero-search-input {
+    border-radius: 50px 0 0 50px !important;
+    border: none !important;
+    padding: 1.2rem 1.5rem !important;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.hero-search-input:focus {
+    box-shadow: 0 4px 20px rgba(25, 135, 84, 0.4);
+    /* Glow màu xanh khi focus */
+}
+
+.hero-search-btn {
+    border-radius: 0 50px 50px 0 !important;
+    padding-left: 30px !important;
+    padding-right: 30px !important;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* --- FEATURED CARDS (CARD CÂY TRỒNG) --- */
+.plant-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: hidden;
+    border: none !important;
+    border-radius: 15px !important;
+}
+
+.plant-card:hover {
+    transform: translateY(-8px);
+    /* Nhấc nhẹ lên khi hover */
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.12) !important;
+}
+
+.card-img-wrapper {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+}
+
+.card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Đảm bảo ảnh luôn full khung */
+    transition: transform 0.5s ease;
+}
+
+.plant-card:hover .card-img-wrapper img {
+    transform: scale(1.1);
+    /* Phóng to ảnh nhẹ bên trong khung */
+}
+
+/* Badge (Nhãn Dược liệu/Quý hiếm) trên ảnh */
+.card-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
+/* --- FOOTER --- */
+footer {
+    background-color: #1a1d20;
+    color: #adb5bd;
+}
+
+/* --- ANIMATIONS --- */
+.animate-up {
+    animation: slideUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.delay-1 {
+    animation-delay: 0.2s;
+}
+
+.delay-2 {
+    animation-delay: 0.4s;
+}
+
+@keyframes slideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
