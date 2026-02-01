@@ -1,0 +1,65 @@
+/* Sidebar link hover */
+.sidebar-link {
+    position: relative;
+    transition: all 0.25s ease;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding-left: 1.5rem;
+}
+
+/* Icon animation */
+.sidebar-link span:first-child {
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.sidebar-link:hover span:first-child {
+    transform: scale(1.15);
+    color: #4ade80;
+    /* green-400 */
+}
+
+/* Active item - sáng, rõ */
+.sidebar-link.active {
+    background-color: #ffffff;
+    color: #111827;
+    /* gray-900 */
+    font-weight: 600;
+    border-radius: 8px;
+    margin: 0 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    position: relative;
+}
+
+/* Vạch xanh bên trái */
+.sidebar-link.active::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 10%;
+    width: 4px;
+    height: 80%;
+    background-color: #22c55e;
+    /* green-500 */
+    border-radius: 2px;
+}
+
+/* Icon active */
+.sidebar-link.active span:first-child {
+    color: #22c55e;
+    transform: scale(1.2);
+}
+
+.sidebar-link:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Text animation */
+.sidebar-text {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-link:hover .sidebar-text {
+    transform: translateX(4px);
+}

@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Plant Knowledge PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "plant_knowledge_db",
+      "Username": "admin",
+      "SSLMode": "prefer"
+    }
+  }
+}

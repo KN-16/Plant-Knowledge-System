@@ -1,0 +1,105 @@
+/* --- GLOBAL ADMIN VARIABLES --- */
+:root {
+    --primary-color: #198754;
+    /* Màu xanh lá chủ đạo */
+    --sidebar-bg: #212529;
+    /* Màu nền sidebar */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 80px;
+}
+
+/* --- ANIMATIONS --- */
+.fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- SIDEBAR STYLING --- */
+.sidebar-wrapper {
+    transition: all 0.3s ease-in-out;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Link trong sidebar */
+.sidebar-link {
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    /* Tránh vỡ dòng khi thu nhỏ */
+    overflow: hidden;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding-left: 1.2rem !important;
+    /* Hiệu ứng đẩy nhẹ sang phải */
+    color: #fff !important;
+}
+
+.sidebar-link.active {
+    background-color: rgba(25, 135, 84, 0.15);
+    /* Nền xanh nhạt trong suốt */
+    border-left: 4px solid var(--primary-color);
+    color: var(--primary-color) !important;
+}
+
+/* Ẩn text khi thu nhỏ (dành cho class collapsed nếu dùng css thuần, 
+   nhưng ở React ta đã xử lý bằng conditional rendering, css này để bổ trợ mượt hơn) */
+.sidebar-collapsed .link-text {
+    opacity: 0;
+    width: 0;
+    display: none;
+}
+
+/* --- DASHBOARD STAT CARDS --- */
+.stat-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* --- DATA TABLE WRAPPER --- */
+/* Làm đẹp thanh scrollbar trong bảng dữ liệu nếu quá dài */
+.rdt_TableBody::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.rdt_TableBody::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.rdt_TableBody::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.rdt_TableBody::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* --- NAVBAR USER DROPDOWN --- */
+.no-arrow::after {
+    display: none !important;
+    /* Ẩn mũi tên mặc định của Bootstrap dropdown */
+}
+
+/* Hiệu ứng item trong dropdown */
+.dropdown-item:active {
+    background-color: var(--primary-color);
+}
