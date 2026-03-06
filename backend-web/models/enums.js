@@ -11,7 +11,9 @@ const RAW_ENUMS = {
     LEAF_MARGIN: ['Entire', 'Serrate', 'Lobed'],
     LEAF_ARRANGEMENT: ['Alternate', 'Opposite', 'Whorled'],
     INFLORESCENCE: ['Umbel', 'Raceme', 'Panicle'],
-    PART_TYPE: ['Leaf', 'Flower', 'Stem', 'Whole_Plant']
+    PART_TYPE: ['Leaf', 'Flower', 'Stem', 'Whole_Plant'],
+    VARIANT_TYPE: ['Variety', 'Phenotype', 'Cultivar'],
+    IMAGE_STATUS: ['Pending', 'Completed', 'Failed'],
 };
 
 // Ánh xạ sang tiếng Việt và cấu trúc cho Frontend (Select option)
@@ -22,6 +24,28 @@ const UI_MAPPINGS = {
         'Herb': 'Cây thảo',
         'Climber': 'Dây leo',
         'Epiphyte': 'Cây phụ sinh'
+    },
+    LIFE_FORM_BG: {
+        'Tree': {
+            label: 'Cây gỗ',
+            bg: 'success'
+        },
+        'Shrub': {
+            label: 'Cây bụi',
+            bg: 'warning text-dark'
+        },
+        'Herb': {
+            label: 'Cây thảo',
+            bg: 'info text-dark'
+        },
+        'Climber': {
+            label: 'Dây leo',
+            bg: 'secondary'
+        },
+        'Epiphyte': {
+            label: 'Cây phụ sinh',
+            bg: 'primary'
+        }
     },
     LEAF_TYPE: {
         'Simple': 'Lá đơn',
@@ -50,9 +74,18 @@ const UI_MAPPINGS = {
         'Panicle': 'Cụm chùm'
     },
     DISTRIBUTION_STATUS: {
-        'Native': 'Bản địa',
-        'Cultivated': 'Trồng trọt',
-        'Invasive': 'Xâm lấn'
+    Native: {
+        label: 'Bản địa',
+        bg: 'success'
+    },
+    Cultivated: {
+        label: 'Trồng trọt',
+        bg: 'info'
+    },
+    Invasive: {
+        label: 'Xâm lấn',
+        bg: 'danger'
+    }
     },
     STEM_TYPE: {
         'Woody': 'Gỗ',
@@ -70,13 +103,12 @@ const UI_MAPPINGS = {
         'Flower': 'Hoa',
         'Stem': 'Thân',
         'Whole_Plant': 'Toàn cây'
+    },
+    VARIANT_TYPE: {
+        'Variety': 'Biến thể phân loại',
+        'Phenotype': 'Biến dị hình thái',
+        'Cultivar': 'Giống trồng'
     }
 };
 
-// Hàm helper để lấy danh sách Options cho Frontend
-const getOptions = (key) => {
-    if (!UI_MAPPINGS[key]) return [];
-    return Object.entries(UI_MAPPINGS[key]).map(([value, label]) => ({ value, label }));
-};
-
-export { RAW_ENUMS, UI_MAPPINGS, getOptions };
+export { RAW_ENUMS, UI_MAPPINGS };

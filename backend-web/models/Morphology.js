@@ -40,7 +40,7 @@ const MorphologyStem = sequelize.define('MorphologyStem', {
     code: { type: DataTypes.STRING, unique: true }, // VD: MST-00001 (Morph Stem)
     variety_id: { type: DataTypes.INTEGER, allowNull: false },
     stem_type: { type: DataTypes.ENUM(...RAW_ENUMS.STEM_TYPE) , allowNull: false },
-    color : { type: DataTypes.STRING , allowNull: false },
+    color : { type: DataTypes.STRING  },
     surface: { type: DataTypes.ENUM(...RAW_ENUMS.STEM_SURFACE), allowNull: false },
     // ... Thêm các field khác như height_min, height_max...
     height_min: { type: DataTypes.FLOAT },

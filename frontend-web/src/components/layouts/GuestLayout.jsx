@@ -52,7 +52,7 @@ const GuestLayout = () => {
                             <ul className="list-unstyled text-white-50 small">
                                 <li className="mb-2 d-flex align-items-start">
                                     <FaMapMarkerAlt className="me-2 mt-1 text-success" /> 
-                                    <span>Trường Đại học Công nghệ Thông tin<br/>Khu phố 6, P.Linh Trung, Tp.Thủ Đức</span>
+                                    <span>Trường Công Nghệ Thông Tin và Truyền Thông - Đại học Cần Thơ<br/>Khu 2, Đại học Cần Thơ, đường 3/2, Ninh Kiều, Cần Thơ</span>
                                 </li>
                                 <li className="mb-2 d-flex align-items-center">
                                     <FaEnvelope className="me-2 text-success" /> 

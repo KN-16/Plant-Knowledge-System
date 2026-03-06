@@ -17,7 +17,7 @@ const Login = () => {
             Swal.fire({ icon: 'success', title: 'Đăng nhập thành công', timer: 1500, showConfirmButton: false });
             navigate('/admin/dashboard');
         } catch (error) {
-            Swal.fire('Lỗi', 'Sai tên đăng nhập hoặc mật khẩu', 'error');
+            Swal.fire({ icon: 'error', title: 'Đăng nhập thất bại', text: error.response?.data?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.', timer: 2000, showConfirmButton: false });
         }
     };
 

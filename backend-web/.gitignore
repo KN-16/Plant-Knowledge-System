@@ -27,3 +27,5 @@ public/uploads/*
 !public/uploads/format-excel-data/.gitkeep
 !public/uploads/tmp/.gitkeep
 !public/uploads/images/.gitkeep
+
+test_database.js

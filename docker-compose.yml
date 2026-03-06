@@ -1,8 +1,6 @@
-name: plant_knowledge_containers
 services:
   postgres:
     image: postgres:16
-    container_name: postgres_db
     restart: unless-stopped
     environment:
       POSTGRES_DB: plant_knowledge_db
@@ -15,7 +13,6 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: pgadmin
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
@@ -28,6 +25,52 @@ services:
     volumes:
       - pgadmin:/var/lib/pgadmin
       - ./pgadmin/servers.json:/pgadmin4/servers.json
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build: 
+      context: ./backend-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # Đổi port 5000 thành port thực tế của BE bạn
+    env_file:
+      - ./backend-web/.env.production
+    depends_on:
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend-web
+      args:
+        VITE_API_URL : http://localhost:3000/api
+        VITE_BACKEND_URL : http://localhost:3000
+    restart: unless-stopped
+    ports:
+      - "5173:80" # Truy cập web tại http://localhost:5173
+    depends_on:
+      - backend
+
 volumes:
   postgres:
   pgadmin:
+  rabbitmq:

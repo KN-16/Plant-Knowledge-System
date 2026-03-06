@@ -9,16 +9,22 @@ const AdminNavbar = ({ toggleSidebar }) => {
     const { user, logout } = useAuthContext();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         Swal.fire({
             title: 'Đăng xuất?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Đăng xuất',
             cancelButtonText: 'Huỷ'
-        }).then((res) => {
+        }).then(async (res) => {
             if (res.isConfirmed) {
-                logout();
+                await logout();
+                Swal.fire({
+                    title: 'Đã đăng xuất',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 navigate('/login');
             }
         });
@@ -31,10 +37,10 @@ const AdminNavbar = ({ toggleSidebar }) => {
                 <Button variant="link" className="text-dark me-3" onClick={toggleSidebar}>
                     <FaBars size={20} />
                 </Button>
-                <Link to="/" className="btn btn-light rounded-circle text-success me-3" title="Trang chủ khách">
+                {/* <Link to="/" className="btn btn-light rounded-circle text-success me-3" title="Trang chủ khách">
                      <FaHome size={24} />
-                </Link>
-                <Form className="d-none d-md-flex w-50 mx-auto">
+                </Link> */}
+                {/* <Form className="d-none d-md-flex w-50 mx-auto">
                     <InputGroup>
                         <Form.Control 
                             placeholder="Tìm kiếm dữ liệu..." 
@@ -47,7 +53,7 @@ const AdminNavbar = ({ toggleSidebar }) => {
                             <FaSearch />
                         </Button>
                     </InputGroup>
-                </Form>
+                </Form> */}
 
                 {/* User Menu Area */}
                 <div className="d-flex align-items-center gap-3 "

@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import { initRabbitMQ } from './config/rabbitmq.js';
 
 // 1. Cấu hình Đường dẫn (Path)
 const __filename = fileURLToPath(import.meta.url);
@@ -53,11 +54,22 @@ const startServer = async () => {
     const { notFound, errorHandler } = await import('./middleware/errorMiddleware.js');
 
     // Kết nối Database
-    await sequelize.authenticate();
-    console.log('✅ Database connected successfully');
-    
-    // Sync Database (Chỉ dùng khi dev để tạo bảng, Production nên tắt)
-    // await sequelize.sync({ alter: true }); 
+    let dbConnected = false;
+    while (!dbConnected) {
+        try {
+            await sequelize.authenticate();
+            console.log('✅ Database connected successfully');
+            dbConnected = true; // Kết nối thành công thì thoát vòng lặp
+        } catch (dbError) {
+            console.error(`❌ Database connection failed: ${dbError.message}`);
+            console.log('⏳ Retrying Database connection in 5 seconds...');
+            // Tạm dừng 5 giây rồi thử lại
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+    }
+
+    // --- RabbitMQ ---
+    await initRabbitMQ();
 
     const app = express();
     const PORT = process.env.PORT || 3000;
@@ -86,6 +98,7 @@ const startServer = async () => {
     app.use(notFound);
     app.use(errorHandler);
 
+    
     // --- Start ---
     app.listen(PORT, () => {
       console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
