@@ -15,7 +15,7 @@ const api = axios.create({
 // ----------------------------
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("accessToken");
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
@@ -51,7 +51,7 @@ api.interceptors.response.use(
         const originalRequest = error.config;
 
         // Không refresh khi login fail
-        if (originalRequest.url.includes("/auth/login")) {
+        if (originalRequest.url.includes("/auth/login") || originalRequest.url.includes("/auth/logout")) {
             return Promise.reject(error);
         }
 
@@ -80,10 +80,10 @@ api.interceptors.response.use(
                     { withCredentials: true }
                 );
 
-                const newToken = data.token;
+                const newToken = data.accessToken;
 
                 // Lưu token mới
-                localStorage.setItem("token", newToken);
+                localStorage.setItem("accessToken", newToken);
 
                 // Giải quyết queue
                 processQueue(null, newToken);
@@ -95,17 +95,18 @@ api.interceptors.response.use(
             } catch (refreshError) {
                 processQueue(refreshError, null);
                 // Refresh fail → logout
-                localStorage.removeItem("token");
+                localStorage.removeItem("accessToken");
+                
                 await Swal.fire({
                 title: 'Phiên đăng nhập hết hạn',
                 text: 'Vui lòng đăng nhập lại.',
                 icon: 'warning',
-                timer: 2000,
+                timer: 1500,
                 showConfirmButton: false,
                 })
-
                 // Điều hướng về login (React)
                 window.location.href = '/login';
+                
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;

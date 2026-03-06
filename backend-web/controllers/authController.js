@@ -1,123 +1,289 @@
 // controllers/authController.js
 
-import asyncHandler from 'express-async-handler';
-import Account from '../models/Account.js';
-import jwt from 'jsonwebtoken';
+// import asyncHandler from 'express-async-handler';
+// import Account from '../models/Account.js';
+// import jwt from 'jsonwebtoken';
 
-const generateToken = (user) => {
-    return jwt.sign({ ...user }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+// const generateToken = (user) => {
+//     return jwt.sign({ ...user }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+// };
+
+// /**
+//  * @desc    Login user
+//  * @route   POST /api/auth/login
+//  * @access  Public
+//  */
+// const loginUser = asyncHandler(async (req, res) => {
+//     const { identifier, password } = req.body;
+//     try {
+//         const user = await Account.findOne({ where: { username: identifier } }) ||
+//                      await Account.findOne({ where: { email: identifier } });
+        
+//         if (user && (await user.checkPassword(password))) {
+//             if(user.status !== 'active') return res.status(403).json({message: "Tài khoản bị khóa"});
+//             const userData ={
+//             account_id: user.account_id,
+//             email: user.email,
+//             code: user.code,
+//             username: user.username,
+//             role: user.role,
+//             full_name: user.full_name,};
+//             res.json({
+//               token: generateToken(userData),
+//             });
+//         } else {
+//             res.status(401).json({ message: "Sai tài khoản hoặc mật khẩu" });
+//         }
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// });
+
+// /**
+//  * @desc    Logout user
+//  * @route   POST /api/auth/logout
+//  * @access  Public
+//  */
+// const logoutUser = asyncHandler(async (req, res) => {
+//   // Clear the httpOnly refresh token cookie
+//   res.cookie('refreshToken', '', {
+//     httpOnly: true,
+//     expires: new Date(0), // Set to a past date
+//   });
+
+//   res.status(200).json({
+//     success: true,
+//     message: 'User logged out successfully',
+//   });
+// });
+
+// /**
+//  * @desc    Refresh access token using refresh token
+//  * @route   POST /api/auth/refresh
+//  * @access  Public (requires valid refresh token cookie)
+//  */
+// const refreshToken = asyncHandler(async (req, res) => {
+//   const refreshToken = req.cookies.refreshToken;
+
+//   if (!refreshToken) {
+//     res.status(401);
+//     throw new Error('Not authorized, no refresh token');
+//   }
+
+//   try {
+//     // Verify the refresh token
+//     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+//     // Find user (check both collections)
+//     let user = await Account.findById(decoded._id);
+
+//     if (!user) {
+//       res.status(401);
+//       throw new Error('User not found');
+//     }
+
+//     // Issue a new Access Token (Refresh token stays the same)
+//     const accessToken = jwt.sign(
+//       { _id: user.account_id, role: user.role },
+//       process.env.JWT_SECRET,
+//       { expiresIn: process.env.JWT_EXPIRES_IN }
+//     );
+
+//     res.status(200).json({
+//       success: true,
+//       accessToken,
+//     });
+//   } catch (error) {
+//     res.status(401);
+//     throw new Error('Not authorized, refresh token failed');
+//   }
+// });
+
+
+// // API tạo Admin đầu tiên (Chạy 1 lần rồi xóa hoặc comment lại)
+// const createInitialAdmin = async (req, res) => {
+//     try {
+//         const exists = await Account.findOne({ where: { username: 'admin' } });
+//         if(exists) return res.status(400).json({message: "Admin exist"});
+        
+//         await Account.create({
+//             username: 'admin',
+//             email: 'admin@system.com',
+//             password_hash: '123456', // Sẽ được hash tự động
+//             role: 'admin',
+//             full_name: 'Super Admin'
+//         });
+//         res.json({message: "Admin created"});
+//     } catch (e) { res.status(500).json(e.message) }
+// }
+
+// export { loginUser, refreshToken, logoutUser, createInitialAdmin };
+
+
+// controllers/authController.js
+
+import asyncHandler from 'express-async-handler';
+import jwt from 'jsonwebtoken';
+import Account from '../models/Account.js';
+
+/* =====================================================
+   TOKEN HELPERS
+===================================================== */
+
+const generateAccessToken = (user) => {
+  return jwt.sign(
+    {
+      account_id: user.account_id,
+      role: user.role,
+    },
+    process.env.JWT_ACCESS_SECRET,
+    { expiresIn: process.env.JWT_ACCESS_EXPIRES }
+  );
 };
 
-/**
- * @desc    Login user
- * @route   POST /api/auth/login
- * @access  Public
- */
+const generateRefreshToken = (user) => {
+  return jwt.sign(
+    {
+      account_id: user.account_id,
+    },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: process.env.JWT_REFRESH_EXPIRES }
+  );
+};
+
+/* =====================================================
+   @desc    Login user
+   @route   POST /api/auth/login
+   @access  Public
+===================================================== */
 const loginUser = asyncHandler(async (req, res) => {
-    const { identifier, password } = req.body;
-    try {
-        const user = await Account.findOne({ where: { username: identifier } }) ||
-                     await Account.findOne({ where: { email: identifier } });
-        
-        if (user && (await user.checkPassword(password))) {
-            if(user.status !== 'active') return res.status(403).json({message: "Tài khoản bị khóa"});
-            const userData ={
-            account_id: user.account_id,
-            email: user.email,
-            code: user.code,
-            username: user.username,
-            role: user.role,
-            full_name: user.full_name,};
-            res.json({
-              token: generateToken(userData),
-            });
-        } else {
-            res.status(401).json({ message: "Sai tài khoản hoặc mật khẩu" });
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+  const { identifier, password } = req.body;
+  const user =
+    (await Account.findOne({ where: { username: identifier } })) ||
+    (await Account.findOne({ where: { email: identifier } }));
+
+  if (!user || !(await user.checkPassword(password))) {
+    return res.status(401).json({ message: 'Sai tài khoản hoặc mật khẩu' });
+  }
+
+  if (user.status !== 'active') {
+    return res.status(403).json({ message: 'Tài khoản bị khóa' });
+  }
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  // Lưu refresh token vào cookie (httpOnly)
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+  });
+  
+  res.status(200).json({
+    accessToken,
+    user: {
+      account_id: user.account_id,
+      code: user.code,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      full_name: user.full_name,
+    },
+  });
+} catch (error) {
+    console.error(error);
+    throw error;
+  }
 });
 
-/**
- * @desc    Logout user
- * @route   POST /api/auth/logout
- * @access  Public
- */
+/* =====================================================
+   @desc    Refresh access token
+   @route   POST /api/auth/refresh
+   @access  Public (cookie refreshToken)
+===================================================== */
+const refreshToken = asyncHandler(async (req, res) => {
+  const token = req.cookies.refreshToken;
+
+  if (!token) {
+    return res.status(401).json({ message: 'Không có refresh token' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+
+    const user = await Account.findByPk(decoded.account_id);
+
+    if (!user || user.status !== 'active') {
+      return res.status(401).json({ message: 'User không hợp lệ' });
+    }
+
+    const newAccessToken = generateAccessToken(user);
+
+    res.status(200).json({
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    return res.status(401).json({ message: 'Refresh token không hợp lệ' });
+  }
+});
+
+/* =====================================================
+   @desc    Logout user
+   @route   POST /api/auth/logout
+   @access  Public
+===================================================== */
 const logoutUser = asyncHandler(async (req, res) => {
-  // Clear the httpOnly refresh token cookie
-  res.cookie('refreshToken', '', {
+  res.clearCookie('refreshToken', {
     httpOnly: true,
-    expires: new Date(0), // Set to a past date
+    sameSite: 'strict',
   });
 
   res.status(200).json({
     success: true,
-    message: 'User logged out successfully',
+    message: 'Đăng xuất thành công',
   });
 });
 
-/**
- * @desc    Refresh access token using refresh token
- * @route   POST /api/auth/refresh
- * @access  Public (requires valid refresh token cookie)
- */
-const refreshToken = asyncHandler(async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+/* =====================================================
+   API tạo Admin đầu tiên (chạy 1 lần)
+===================================================== */
+const createInitialAdmin = asyncHandler(async (req, res) => {
+  const exists = await Account.findOne({ where: { username: 'admin' } });
 
-  if (!refreshToken) {
-    res.status(401);
-    throw new Error('Not authorized, no refresh token');
+  if (exists) {
+    return res.status(400).json({ message: 'Admin đã tồn tại' });
   }
 
-  try {
-    // Verify the refresh token
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  await Account.create({
+    username: 'admin',
+    email: 'admin@system.com',
+    password_hash: '123456', // hook sẽ hash
+    role: 'admin',
+    full_name: 'Super Admin',
+    status: 'active',
+  });
 
-    // Find user (check both collections)
-    let user = await Account.findById(decoded._id);
-
-    if (!user) {
-      res.status(401);
-      throw new Error('User not found');
-    }
-
-    // Issue a new Access Token (Refresh token stays the same)
-    const accessToken = jwt.sign(
-      { _id: user.account_id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
-
-    res.status(200).json({
-      success: true,
-      accessToken,
-    });
-  } catch (error) {
-    res.status(401);
-    throw new Error('Not authorized, refresh token failed');
-  }
+  res.status(201).json({ message: 'Admin created successfully' });
 });
 
+const getMe = asyncHandler(async (req, res) => {
+  const user = await Account.findByPk(req.user.account_id, {
+    attributes: ['account_id', 'username', 'email', 'role', 'full_name', 'status'],
+  });
 
-// API tạo Admin đầu tiên (Chạy 1 lần rồi xóa hoặc comment lại)
-const createInitialAdmin = async (req, res) => {
-    try {
-        const exists = await Account.findOne({ where: { username: 'admin' } });
-        if(exists) return res.status(400).json({message: "Admin exist"});
-        
-        await Account.create({
-            username: 'admin',
-            email: 'admin@system.com',
-            password_hash: '123456', // Sẽ được hash tự động
-            role: 'admin',
-            full_name: 'Super Admin'
-        });
-        res.json({message: "Admin created"});
-    } catch (e) { res.status(500).json(e.message) }
-}
+  res.json(user);
+});
 
-export { loginUser, refreshToken, logoutUser, createInitialAdmin };
+export {
+  loginUser,
+  refreshToken,
+  logoutUser,
+  createInitialAdmin,
+  getMe,
+};
+
 
 
 // import Docgia from '../models/Docgia.js';

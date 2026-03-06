@@ -35,38 +35,60 @@ const adminOnly = (req, res, next) => {
 const requireAuth = asyncHandler(async (req, res, next) => {
   let token;
 
-  // Read the JWT from the Authorization header
+  // 1. Kiểm tra header
   const authHeader = req.headers.authorization;
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
     try {
+      // Lấy token
       token = authHeader.split(' ')[1];
 
-      // Verify the token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      // Find the user by ID from token
-      // We check both collections, as either a reader or staff could be authenticated
-      let user = await Account.findByPk(decoded.account_id);
+      // 2. Verify token (SỬA: Dùng đúng JWT_ACCESS_SECRET)
+      const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+
+      // 3. Tìm user trong DB (để chắc chắn user chưa bị xóa/ban)
+      // Tối ưu: Chỉ select các trường cần thiết, không lấy password_hash
+      const user = await Account.findByPk(decoded.account_id, {
+        attributes: ['account_id', 'role', 'status', 'username'] 
+      });
 
       if (user) {
+        // 4. Kiểm tra xem tài khoản có bị khóa không (BỔ SUNG)
+        if (user.status !== 'active') {
+             res.status(403);
+             throw new Error('Tài khoản đã bị vô hiệu hóa');
+        }
+
+        // Gán user vào req để dùng ở controller tiếp theo
         req.user = {
           account_id: user.account_id,
-          role: user.role, 
+          username: user.username,
+          role: user.role,
         };
+        
         next();
       } else {
         res.status(401);
         throw new Error('User not found');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Auth Error:', error.message);
+      
+      // Nếu token hết hạn, jwt.verify sẽ ném lỗi TokenExpiredError
+      // Frontend cần mã 401 để kích hoạt cơ chế Refresh Token
       res.status(401);
-      throw new Error('Not authorized, token failed');
+      
+      if (error.name === 'TokenExpiredError') {
+          throw new Error('Token expired');
+      } else {
+          throw new Error('Not authorized, token failed');
+      }
     }
   } else {
     res.status(401);
     throw new Error('Not authorized, no token');
   }
 });
+
 
 export { requireAuth, adminOnly, verifyToken};

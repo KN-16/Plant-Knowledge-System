@@ -7,7 +7,7 @@ import Loading from '../Loading';
 const DataTableCustom = ({ 
     title, columns, data, loading, totalRows, 
     handlePerRowsChange, handlePageChange, 
-    onAdd, onImport, onSearch 
+    onAdd, onImport, onSearch, isExcelable= false
 }) => {
     const [searchText, setSearchText] = useState('');
 
@@ -75,7 +75,7 @@ const DataTableCustom = ({
                 <div className="d-flex gap-2">
                     <InputGroup style={{ width: '300px' }}>
                         <Form.Control 
-                            placeholder="Tìm kiếm..." 
+                            placeholder="Tìm kiếm theo mã, tên khoa học, tên tiếng Việt..." 
                             className="bg-light"
                             value={searchText}
                             onChange={handleSearchChange}
@@ -85,7 +85,7 @@ const DataTableCustom = ({
                         </Button>
                     </InputGroup>
                     
-                    {onImport && (
+                    {isExcelable && onImport && (
                         <Button variant="outline-success" onClick={onImport} title="Nhập Excel">
                             <FaFileExcel /> <span className="d-none d-md-inline">Excel</span>
                         </Button>
@@ -110,6 +110,7 @@ const DataTableCustom = ({
                 onChangeRowsPerPage={handlePerRowsChange}
                 onChangePage={handlePageChange}
                 customStyles={customStyles}
+                persistTableHead
                 highlightOnHover
                 fixedHeader
                 noDataComponent={<div className="p-5 text-muted bg-light w-100 text-center">Không tìm thấy dữ liệu nào.</div>}

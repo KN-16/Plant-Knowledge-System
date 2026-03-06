@@ -60,7 +60,9 @@ export const Species = sequelize.define('Species', {
     vietnamese_name: { type: DataTypes.STRING},
     synonyms: { type: DataTypes.STRING},
     other_names: { type: DataTypes.STRING},
-    uses: { type: DataTypes.TEXT }
+    uses: { type: DataTypes.TEXT },
+    description: { type: DataTypes.TEXT },
+    authority: { type: DataTypes.STRING }
 }, { tableName: 'species' , timestamps: true , indexes: [
     {
         unique: true, // Không cho phép trùng lặp

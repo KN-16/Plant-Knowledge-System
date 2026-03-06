@@ -8,36 +8,47 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     // ⬅️ Khai báo trước (fix lỗi hoisting)
-    const logout = () => {
-        localStorage.removeItem("token");
+    const logout = async () => {
+        try {
+            await api.post("/auth/logout");
+        } catch (err) {
+            // ignore
+        }
+
+        localStorage.removeItem("accessToken");
         setUser(null);
     };
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const initializeAuth = async () => {
+            const token = localStorage.getItem("accessToken");
 
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-
-                // Kiểm tra hạn token
-                if (decoded.exp * 1000 < Date.now()) {
-                    logout();
-                } else {
-                    setUser(decoded);
-                }
-            } catch {
-                logout();
+            if (!token) {
+                setLoading(false);
+                return;
             }
-        }
 
-        setLoading(false);
+            try {
+                const res = await api.get("/auth/me");
+                setUser(res.data);
+            } catch (err) {
+                // Nếu vào đây nghĩa là Token hết hạn VÀ Refresh Token cũng hết hạn/không hợp lệ
+                console.log("Session expired or invalid");
+                console.error(err);
+                localStorage.removeItem("accessToken");
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        initializeAuth();
     }, []);
 
     const login = async (username, password) => {
         const res = await api.post("/auth/login", { identifier: username, password });
-        localStorage.setItem("token", res.data.token);
-        setUser(jwtDecode(res.data.token));
+        localStorage.setItem("accessToken", res.data.accessToken);
+        setUser(res.data.user);
         return;
     };
 

@@ -14,53 +14,7 @@ const GenusPage = () => {
     const [importShow, setImportShow] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [status, setStatus] = useState(''); // 'add' hoặc 'edit' or detail
-    const [familyList, setFamilyList] = useState([]);
-    const [smartSelectFamily, setSmartSelectFamily] = useState({});
 
-    // const onAddNewGenus = async () => {
-
-    // setSelectedItem(null);
-    // setModalShow(true);
-    // setStatus("add");
-
-    // const family_data = await adminService.fetchAllItems('families');
-    // setFamilyList(family_data);
-
-    // const options = family_data.map(fam => ({
-    //     value: fam.family_id,
-    //     label: `${fam.code} - ${fam.scientific_name}`
-    // }));
-
-    // setSmartSelectFamily({
-    //     options,
-    //     label: "Họ thực vật",
-    //     value: "",
-    //     selected: null,
-    //     onChange: (option) => {
-
-    //     // Chọn thêm mới
-    //     if (option?.value === "new") {
-    //         setSmartSelectFamily(prev => ({
-    //         ...prev,
-    //         value: option,
-    //         selected: { scientific_name: "", vietnamese_name: "" }
-    //         }));
-    //         return;
-    //     }
-
-    //     // Chọn family thường
-    //     const found = family_data.find(
-    //         f => f.family_id === option.value
-    //     );
-    //     console.log('found family: ', found);
-    //     setSmartSelectFamily(prev => ({
-    //         ...prev,
-    //         value: option,
-    //         selected: found
-    //     }));
-    //     }
-    // });
-    // };
     const columns = [
             {
                 name: 'Mã',
@@ -112,7 +66,7 @@ const GenusPage = () => {
                         <Button variant="outline-primary" size="sm" className="rounded-circle" onClick={() => { setSelectedItem(row); setModalShow(true); setStatus('edit'); }}>
                             <FaEdit />
                         </Button>
-                        <Button variant="outline-danger" size="sm" className="rounded-circle" onClick={() => handleDelete(row.family_id)}>
+                        <Button variant="outline-danger" size="sm" className="rounded-circle" onClick={() => handleDelete(row.genus_id)}>
                             <FaTrash />
                         </Button>
                     </div>

@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 
 const useCrud = (endpoint) => {
     const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [totalRows, setTotalRows] = useState(0);
     const [perPage, setPerPage] = useState(10);
     const [page, setPage] = useState(1);
@@ -49,12 +49,16 @@ const useCrud = (endpoint) => {
             }
         }
     };
+    const handleSearch = (value) => {
+        setSearch(value);
+        setPage(1); // Luôn về trang 1 khi tìm kiếm mới
+    };
 
     return {
         data, loading, totalRows,
         handlePageChange: page => setPage(page),
         handlePerRowsChange: (newPerPage, page) => { setPerPage(newPerPage); setPage(page); },
-        setSearch,
+        setSearch: handleSearch,
         handleDelete,
         fetchData
     };

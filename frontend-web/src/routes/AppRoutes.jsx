@@ -5,13 +5,16 @@ import AdminLayout from '../components/layouts/AdminLayout';
 import GuestLayout from '../components/layouts/GuestLayout';
 import ProtectedRoute from './ProtectedRoute';
 
+
 // Lazy Load Pages
 const Login = lazy(() => import('../pages/auth/Login'));
+const NotFound = lazy(() => import('../pages/NotFound'));
 const HomePage = lazy(() => import('../pages/guest/HomePage'));
 const SpeciesPage = lazy(() => import('../pages/admin/SpeciesPage'));
 const GenusPage = lazy(() => import('../pages/admin/GenusPage')); // Bạn tự tạo file
 const FamilyPage = lazy(() => import('../pages/admin/FamilyPage')); // Bạn tự tạo file
 const Dashboard = lazy(() => import('../pages/admin/Dashboard')); // Bạn tự tạo file
+const VarietyPage = lazy(() => import('../pages/admin/VarietyPage'));
 
 const AppRoutes = () => {
     const elements = useRoutes([
@@ -32,8 +35,11 @@ const AppRoutes = () => {
                 { path: 'families', element: <FamilyPage /> },
                 { path: 'genera', element: <GenusPage /> },
                 { path: 'species', element: <SpeciesPage /> },
+                { path: 'varieties', element: <VarietyPage /> },
             ]
-        }
+        },
+        // Not Found
+        { path: '*', element: <NotFound /> }
     ]);
 
     return <Suspense fallback={<Loading fullScreen />}>{elements}</Suspense>;

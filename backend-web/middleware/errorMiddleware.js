@@ -45,5 +45,33 @@ const errorHandler = (err, req, res, next) => {
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,
   });
 };
+import fs from "fs";
+import path from "path";
 
-export { notFound, errorHandler };
+const cleanupUploadedFilesOnError = async (err, req, res, next) => {
+    try {
+        if (req.files && req.files.length > 0) {
+            for (const file of req.files) {
+                const filePath = file.path; // multer đã lưu sẵn full path
+                try {
+                    await fs.promises.unlink(filePath);
+                } catch (unlinkErr) {
+                    console.error("Không thể xóa file:", filePath);
+                }
+            }
+        }
+
+        if (req.file) {
+            try {
+                await fs.promises.unlink(req.file.path);
+            } catch (unlinkErr) {
+                console.error("Không thể xóa file:", req.file.path);
+            }
+        }
+    } catch (cleanupError) {
+        console.error("Cleanup error:", cleanupError);
+    }
+
+    next(err); // chuyển tiếp sang error handler chính
+};
+export { notFound, errorHandler, cleanupUploadedFilesOnError };
