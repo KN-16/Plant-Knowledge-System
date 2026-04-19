@@ -32,7 +32,7 @@ export const Distribution = sequelize.define('Distribution', {
     province_id: { type: DataTypes.INTEGER, allowNull: false },
     code: { type: DataTypes.STRING, unique: true }, // VD: DIS-00001
     status: { type: DataTypes.ENUM(...RAW_ENUMS.DISTRIBUTION_STATUS), allowNull: false }, // Tình trạng phân bố
-    description: { type: DataTypes.TEXT },
+    description: { type: DataTypes.TEXT }, // Mô tả cụ thể phân bố như sống ở đâu, độ cao, nơi ở,...
 }, 
 { tableName: 'distributions'
     , timestamps: true

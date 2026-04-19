@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+// import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import path from 'path';
@@ -12,17 +12,15 @@ import { initRabbitMQ } from './config/rabbitmq.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ============================================================
-// 2. THUẬT TOÁN LOAD BIẾN MÔI TRƯỜNG (Đã phục hồi & Tối ưu)
-// ============================================================
-const envFile = process.env.NODE_ENV === 'production'
-  ? '.env.production'
-  : '.env.development';
+if (process.env.NODE_ENV !== 'production') {
+  // Ở local, load file .env.development
+  dotenv.config({ path: path.resolve(__dirname, '.env.development') });
+  console.log(`✅ Loaded environment: .env.development`);
+} else {
+  // Ở production, hệ thống tự động nhận biến từ OS/Docker
+  console.log(`✅ Running in PRODUCTION mode. Environment variables loaded from Docker.`);
+}
 
-// Load file env tương ứng từ thư mục root
-dotenv.config({ path: path.resolve(__dirname, envFile) });
-
-console.log(`✅ Loaded environment: ${envFile}`);
 console.log(`✅ Database Config: ${process.env.DB_NAME} @ ${process.env.DB_HOST}`);
 
 // ============================================================
@@ -30,10 +28,9 @@ console.log(`✅ Database Config: ${process.env.DB_NAME} @ ${process.env.DB_HOST
 // ============================================================
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 const IMG_DIR = path.join(UPLOAD_DIR, 'images');
-const EXCEL_DIR = path.join(UPLOAD_DIR, 'format-excel-data');
 
 const ensureDirectories = () => {
-  [UPLOAD_DIR, IMG_DIR, EXCEL_DIR].forEach(dir => {
+  [UPLOAD_DIR, IMG_DIR].forEach(dir => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
       console.log(`📂 Created directory: ${dir}`);
@@ -74,13 +71,13 @@ const startServer = async () => {
     const app = express();
     const PORT = process.env.PORT || 3000;
 
-    // --- Middleware ---
-    const corsOptions = {
-      origin: [process.env.AI_ORIGIN, process.env.ORIGIN_FRONTEND, 'http://localhost:5173'],
-      credentials: true,
-    };
+    // // --- Middleware ---
+    // const corsOptions = {
+    //   origin: [process.env.ORIGIN_FRONTEND, 'http://localhost:5173'],
+    //   credentials: true,
+    // };
     
-    app.use(cors(corsOptions));
+    // app.use(cors(corsOptions));
     app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));

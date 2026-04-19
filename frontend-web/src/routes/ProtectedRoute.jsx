@@ -1,4 +1,3 @@
-import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthContext } from '../context/useAuthContext';
 import Loading from '../components/common/Loading';

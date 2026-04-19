@@ -32,7 +32,7 @@ const ModalForm = ({ show, onHide, initialData, onSuccess, type, title, status }
                 // Map data từ API sang format của React Select
                 const options = data.map(fam => ({
                     value: fam.family_id,
-                    label: `${fam.scientific_name} - ${fam.code}`
+                    label: `${fam.scientific_name} - ${fam.vietnamese_name} - ${fam.code}`
                 }));
                 setFamilyOptions(options);
             } catch (error) {
@@ -61,7 +61,7 @@ const ModalForm = ({ show, onHide, initialData, onSuccess, type, title, status }
         if (data.Family) {
             data.family_select = {
                 value: data.Family.family_id,
-                label: `${data.Family.scientific_name} - ${data.Family.code}`
+                label: `${data.Family.scientific_name} - ${data.Family.vietnamese_name} - ${data.Family.code}`
             };
             data.new_family_scientific_name = data.Family.scientific_name || '';
             data.new_family_vietnamese_name = data.Family.vietnamese_name || '';
@@ -246,7 +246,7 @@ const ModalForm = ({ show, onHide, initialData, onSuccess, type, title, status }
                                                     </div>
                                                 </Col>)}
                                                 <Col md={6}>
-                                                    <Form.Label>Tên khoa học (Họ mới) <span className="text-danger">*</span></Form.Label>
+                                                    <Form.Label>Tên khoa học (Họ) <span className="text-danger">*</span></Form.Label>
                                                     <Form.Control
                                                         {...register('new_family_scientific_name', {
                                                             required: isCreatingNewFamily ? "Tên khoa học Họ thực vật là bắt buộc" : false
@@ -260,7 +260,7 @@ const ModalForm = ({ show, onHide, initialData, onSuccess, type, title, status }
                                                     </Form.Control.Feedback>
                                                 </Col>
                                                 <Col md={6}>
-                                                    <Form.Label>Tên Tiếng Việt (Họ mới)</Form.Label>
+                                                    <Form.Label>Tên Tiếng Việt (Họ)</Form.Label>
                                                     <Form.Control
                                                         {...register('new_family_vietnamese_name')}
                                                         placeholder="Nhập tên tiếng Việt..."

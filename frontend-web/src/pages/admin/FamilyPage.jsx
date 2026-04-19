@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useCrud from '../../hooks/useCrud';
 import DataTableCustom from '../../components/common/DataTableCustom';
 import ModalForm from '../../components/modal/ModalForm/familyForm';
 import ExcelImportModal from '../../components/modal/ExcelImportModal';
 import { Button, Badge } from 'react-bootstrap';
-import { FaEdit, FaTrash, FaEye } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaProjectDiagram } from 'react-icons/fa';
 import adminService from '../../services/adminService';
+import TaxonomyTreeModal from '../../components/modal/TaxonomyTreeModal';
+import Swal from 'sweetalert2';
+import { Helmet } from 'react-helmet-async';
+import { Spinner } from 'react-bootstrap';
 
 const FamilyPage = () => {
     // Gọi hook useCrud trỏ vào endpoint /families
@@ -15,12 +19,25 @@ const FamilyPage = () => {
     const [importShow, setImportShow] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [status, setStatus] = useState(''); // 'add' hoặc 'edit' or detail
-//     family_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-//     code: { type: DataTypes.STRING, unique: true }, // VD: FAM-00001
-//     scientific_name: { type: DataTypes.STRING, allowNull: false },
-//     vietnamese_name: { type: DataTypes.STRING},
-//     description: { type: DataTypes.TEXT },
-//     authority: { type: DataTypes.STRING }
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    const [treeData, setTreeData] = useState([]);
+    const [treeModalShow, setTreeModalShow] = useState(false);
+    const [isFetching, setIsFetching] = useState(false);
+    const [uiMapping, setUiMapping] = useState({});
+    
+    useEffect(() => {
+        const fetchUIOptions = async () => {
+            try {
+                const mappings = await adminService.fetchUIOptions();
+                setUiMapping(mappings);
+            } catch (error) {
+                console.error('Error fetching UI mappings:', error);
+            }
+        };
+        fetchUIOptions();
+    }, []);
+    
     const columns = [
         {
             name: 'Mã',
@@ -45,15 +62,38 @@ const FamilyPage = () => {
             sortable: true,
         },
         {
-            name: 'Tác giả',
-            selector: row => row.authority || '---',
-            width: '200px',
-            sortable: true,
-        },
-        {
-            name: 'Mô tả',
-            selector: row => row.description || '---',
-            wrap: true,
+            name: 'Xem cây phân loại',
+            cell: row => (
+                (isFetching) ? (
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </Spinner>
+                ):(
+                <Button variant="outline-info" size="sm" className="rounded-circle" onClick={async () => {
+                    setIsFetching(true);
+                    try {
+                        const data= await adminService.fetchTaxonomyTree({ family_id: row.family_id });
+                        setTreeData(data);
+                        console.log(data);
+                        setIsFetching(false);
+                        setTreeModalShow(true);
+                    } catch (error) {
+                        console.error('Error fetching taxonomy tree:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Xem cây phân loại thất bại. Vui lòng thử lại sau.',
+                        });
+                        setIsFetching(false);
+                    } 
+                    setIsFetching(false);
+                }}
+                >
+                <FaProjectDiagram />
+                </Button>
+            )),
+            center: true,
+            width: '200px'
         },
         {
             name: 'Xem chi tiết',
@@ -84,6 +124,9 @@ const FamilyPage = () => {
 
     return (
         <>
+            <Helmet>
+                <title>PlantDB | Quản lý Họ Thực Vật</title>
+            </Helmet>
             <DataTableCustom 
                 title="DANH SÁCH HỌ THỰC VẬT"
                 columns={columns}
@@ -107,11 +150,20 @@ const FamilyPage = () => {
                     type="families" title="Họ Thực Vật"
                 />
             )}
-
+            {
+                treeModalShow && (
+                    <TaxonomyTreeModal 
+                        show={treeModalShow} onHide={() => setTreeModalShow(false)}
+                        treeData={treeData}
+                        backendUrl={backendUrl}
+                        uiMapping={uiMapping}
+                    />
+                )
+            }
             {importShow && (
                 <ExcelImportModal 
                     show={importShow} onHide={() => setImportShow(false)}
-                    onSuccess={() => { fetchData(); }} type="families"
+                    onSuccess={() => { fetchData(); }} 
                 />
             )}
         </>

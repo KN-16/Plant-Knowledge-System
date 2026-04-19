@@ -5,6 +5,8 @@ import {
   logoutUser,
   createInitialAdmin,
   getMe,
+  updateMyProfile,
+  changeMyPassword
 } from '../controllers/authController.js';
 
 import {
@@ -27,5 +29,7 @@ router.post('/refresh', refreshToken);
 router.post('/logout', requireAuth, logoutUser);
 router.post('/create-initial-admin', createInitialAdmin);
 router.get('/me', requireAuth, getMe);
+router.put('/profile', requireAuth ,updateMyProfile);
+router.put('/change-password',requireAuth, changeMyPassword);
 
 export default router;

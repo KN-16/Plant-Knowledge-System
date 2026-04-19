@@ -19,6 +19,8 @@ router.post('/species', requireAuth, taxController.createSpecies);
 // Put species
 router.put('/species/:id', requireAuth, taxController.updateSpecies);
 
+// Get taxonomy tree
+router.get('/taxonomy-tree', taxController.getTaxonomyTree);
 
 // Variety CRUD
 
@@ -40,14 +42,12 @@ router.delete('/varieties/:id', requireAuth, varController.deleteVariety);
 
 // GET list
 router.get('/:type', taxController.getList);
-// GET search for select
-router.get('/:type/search', taxController.searchForSelect);
 // POST create
 router.post('/:type', requireAuth, requireRole('admin'), taxController.createItem);
 // PUT update
 router.put('/:type/:id', requireAuth, requireRole('admin'), taxController.updateItem);
 // DELETE
-router.delete('/:type/:id', requireAuth, requireRole('admin'), taxController.deleteItem);
+router.delete('/:type/:id', requireAuth, taxController.deleteItem);
 // Fetch list without pagination
 router.get('/:type/all', taxController.fetchAllItems);
 

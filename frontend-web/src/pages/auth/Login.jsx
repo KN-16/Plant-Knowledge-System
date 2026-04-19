@@ -30,7 +30,7 @@ const Login = () => {
                             <Card.Body className="p-5">
                                 <div className="text-center mb-4">
                                     <FaLeaf className="text-success display-1 mb-3" />
-                                    <h3 className="fw-bold text-dark">Đăng nhập Admin</h3>
+                                    <h3 className="fw-bold text-dark">Đăng nhập Quản trị viên</h3>
                                 </div>
                                 <Form onSubmit={handleSubmit(onSubmit)}>
                                     <Form.Group className="mb-3">
