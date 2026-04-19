@@ -9,12 +9,19 @@ import ProtectedRoute from './ProtectedRoute';
 // Lazy Load Pages
 const Login = lazy(() => import('../pages/auth/Login'));
 const NotFound = lazy(() => import('../pages/NotFound'));
-const HomePage = lazy(() => import('../pages/guest/HomePage'));
+const HomePage = lazy(() => import('../pages/guest/HomePage/index'));
 const SpeciesPage = lazy(() => import('../pages/admin/SpeciesPage'));
-const GenusPage = lazy(() => import('../pages/admin/GenusPage')); // Bạn tự tạo file
-const FamilyPage = lazy(() => import('../pages/admin/FamilyPage')); // Bạn tự tạo file
-const Dashboard = lazy(() => import('../pages/admin/Dashboard')); // Bạn tự tạo file
+const GenusPage = lazy(() => import('../pages/admin/GenusPage')); 
+const FamilyPage = lazy(() => import('../pages/admin/FamilyPage')); 
+const Dashboard = lazy(() => import('../pages/admin/Dashboard')); 
 const VarietyPage = lazy(() => import('../pages/admin/VarietyPage'));
+const VarietyLibraryPage = lazy(() => import('../pages/guest/VarietyLibraryPage/VarietyLibraryPage'));
+const TaxonomyExplorerPage = lazy(() => import('../pages/guest/TaxonomyExplorerPage'));
+const VarietyDetailPage = lazy(() => import('../pages/guest/VarietyDetailPage'));
+const SearchResultsPage = lazy(() => import('../pages/guest/SearchResultsPage'));
+const UserProfile = lazy(() => import('../pages/admin/UserProfile'));
+const AccountPage = lazy(() => import('../pages/admin/AccountPage'));
+
 
 const AppRoutes = () => {
     const elements = useRoutes([
@@ -23,7 +30,11 @@ const AppRoutes = () => {
             element: <GuestLayout />,
             children: [
                 { index: true, element: <HomePage /> },
-                { path: 'login', element: <Login /> }
+                { path: 'login', element: <Login /> },
+                { path: 'varieties', element: <VarietyLibraryPage /> },
+                { path: 'taxonomy-explorer', element: <TaxonomyExplorerPage /> },
+                { path: 'varieties/:id', element: <VarietyDetailPage /> },
+                { path: 'ai-search-results', element: <SearchResultsPage /> },
             ]
         },
         {
@@ -36,6 +47,8 @@ const AppRoutes = () => {
                 { path: 'genera', element: <GenusPage /> },
                 { path: 'species', element: <SpeciesPage /> },
                 { path: 'varieties', element: <VarietyPage /> },
+                { path: 'profile', element: <UserProfile /> },
+                { path: 'users', element: <AccountPage /> },
             ]
         },
         // Not Found

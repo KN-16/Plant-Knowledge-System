@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
-import api from "../services/api";
 import { AuthContext } from "./useAuthContext";
+import adminService from "../services/adminService";
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -10,7 +9,7 @@ export const AuthProvider = ({ children }) => {
     // ⬅️ Khai báo trước (fix lỗi hoisting)
     const logout = async () => {
         try {
-            await api.post("/auth/logout");
+            await adminService.logout();
         } catch (err) {
             // ignore
         }
@@ -29,8 +28,8 @@ export const AuthProvider = ({ children }) => {
             }
 
             try {
-                const res = await api.get("/auth/me");
-                setUser(res.data);
+                const res = await adminService.getMyProfile();
+                setUser(res);
             } catch (err) {
                 // Nếu vào đây nghĩa là Token hết hạn VÀ Refresh Token cũng hết hạn/không hợp lệ
                 console.log("Session expired or invalid");
@@ -46,9 +45,9 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (username, password) => {
-        const res = await api.post("/auth/login", { identifier: username, password });
-        localStorage.setItem("accessToken", res.data.accessToken);
-        setUser(res.data.user);
+        const res = await adminService.login({ identifier: username, password });
+        localStorage.setItem("accessToken", res.accessToken);
+        setUser(res.user);
         return;
     };
 

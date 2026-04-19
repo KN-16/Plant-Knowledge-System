@@ -63,6 +63,64 @@ const fetchProvinces = async () => {
     const res = await api.get(`${endpointTaxonomy}/varieties/provinces`);
     return res.data;
 }
+
+const fetchTaxonomyTree = async (payload) => {
+    const res = await api.get(`${endpointTaxonomy}/taxonomy-tree`, { params: payload });
+    return res.data.data;
+}
+
+const createAccount = async (payload) => {
+    const res = await api.post('/admin/accounts', payload);
+    return res.data;
+}
+
+const updateAccount = async (id, payload) => {
+    const res = await api.put(`/admin/accounts/${id}`, payload);
+    return res.data;
+}
+
+const updatePassword = async (id, payload) => {
+    const res = await api.put(`/admin/accounts/${id}/password`, payload);
+    return res.data;
+}
+
+const toggleStatus = async (id, payload) => {
+    const res = await api.put(`/admin/accounts/${id}/status`, payload);
+    return res.data;
+}
+
+const deleteAccount = async (id) => {
+    const res = await api.delete(`/admin/accounts/${id}`);
+    return res.data;
+}
+
+
+const updateMyProfile = async (payload) => {
+    const res = await api.put('/auth/profile', payload);
+    return res.data;
+}
+
+const changeMyPassword = async (payload) => {
+    const res = await api.put('/auth/change-password', payload);
+    return res.data;
+}
+
+const logout = async () => {
+    const res = await api.post('/auth/logout');
+    return res.data;
+}
+
+const login = async (payload) => {
+    const res = await api.post('/auth/login', payload);
+    return res.data;
+}
+
+const getMyProfile = async () => {
+    const res = await api.get('/auth/me');
+    return res.data;
+}
+
+
 export default {
     fetchDashboardStats,
     endpointFetchFamily,
@@ -78,6 +136,17 @@ export default {
     getVarietyDetail,
     saveVariety,
     fetchUIOptions,
-    fetchProvinces
+    fetchProvinces,
+    fetchTaxonomyTree,
+    createAccount,
+    updateAccount,
+    updatePassword,
+    toggleStatus,
+    deleteAccount,
+    updateMyProfile,
+    changeMyPassword,
+    logout,
+    login,
+    getMyProfile
 };
 

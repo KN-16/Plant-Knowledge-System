@@ -22,10 +22,11 @@ Thumbs.db
 *.swo
 
 # Uploaded files (Keep the directory, ignore content)
-public/uploads/*
-!public/uploads/.gitkeep
-!public/uploads/format-excel-data/.gitkeep
-!public/uploads/tmp/.gitkeep
-!public/uploads/images/.gitkeep
+uploads/
+# !uploads/.gitkeep
+# !uploads/tmp/.gitkeep
+# !uploads/images/.gitkeep
 
-test_database.js
+.venv/
+
+backend-AI/

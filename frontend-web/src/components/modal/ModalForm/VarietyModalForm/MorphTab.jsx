@@ -2,7 +2,7 @@ import React, { useState, useEffect, use } from 'react';
 import { useWatch } from 'react-hook-form';
 import { Row, Col, Form, Card } from 'react-bootstrap';
 
-const MorphTab = ({ register, watch, status, setValue, control, errors, uiOptions  }) => {
+const MorphTab = ({ register, watch, status, setValue, control, errors, uiOptions, trigger  }) => {
     // Watch states để Tắt/Bật khu vực nhập liệu
     const hasLeaf = useWatch({
         control,
@@ -24,6 +24,32 @@ const MorphTab = ({ register, watch, status, setValue, control, errors, uiOption
 
     // Validation rule chung cho số dương
     const positiveNumberRule = { valueAsNumber: true, validate: (value) => value ? (value > 0 || "Phải là số dương") : true };
+    const maxNumberRule = (keyMin) => {
+    return {
+        ...positiveNumberRule, // Giữ nguyên các rule cơ bản của bạn (min, required...)
+        valueAsNumber: true,
+        validate: (value, formValues) => {
+            // 1. Lấy giá trị của ô Min thông qua formValues (Tính năng có sẵn của hook-form)
+            const minRaw = formValues[keyMin];
+
+            // 2. Bỏ qua so sánh nếu 1 trong 2 ô đang bị bỏ trống (Để các rule như required tự lo)
+            if (value === undefined || value === null || Number.isNaN(value) || value === '') return true;
+            if (minRaw === undefined || minRaw === null || minRaw === '') return true;
+
+            // 3. Ép kiểu rõ ràng về số thực (Float) để tránh lỗi so sánh chuỗi
+            const maxVal = parseFloat(value);
+            const minVal = parseFloat(minRaw);
+
+            // 4. So sánh toán học
+            if (maxVal < minVal) {
+                return "Tối đa phải lớn hơn hoặc bằng tối thiểu";
+            }
+
+            return true; // Hợp lệ
+        }
+    };
+};
+    
 
     const diabledLeaf = status === 'detail' || !hasLeaf;
     const diabledStem = status === 'detail' || !hasStem;
@@ -85,27 +111,35 @@ const MorphTab = ({ register, watch, status, setValue, control, errors, uiOption
                             </Col>                            
                             <Col md={2}>
                                 <Form.Label className="small fw-bold text-muted mb-1">Dài tối thiểu (Nếu có)</Form.Label>
-                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_length_min', positiveNumberRule)} placeholder="> 0" disabled={diabledLeaf} isInvalid={!!errors.leaf_length_min} />
+                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_length_min', 
+                                {
+                                    ...positiveNumberRule,
+                                    onChange: () => trigger('leaf_length_max') 
+                                })}  disabled={diabledLeaf} isInvalid={!!errors.leaf_length_min} />
                                 {errors.leaf_length_min && <Form.Control.Feedback type="invalid">{errors.leaf_length_min.message}</Form.Control.Feedback>}
                             </Col>
                             <Col md={2}>
                                 <Form.Label className="small fw-bold text-muted mb-1">Dài tối đa (Nếu có)</Form.Label>
-                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_length_max', positiveNumberRule)} placeholder="> 0" disabled={diabledLeaf} isInvalid={!!errors.leaf_length_max} />
+                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_length_max', maxNumberRule('leaf_length_min'))}  disabled={diabledLeaf} isInvalid={!!errors.leaf_length_max} />
                                 {errors.leaf_length_max && <Form.Control.Feedback type="invalid">{errors.leaf_length_max.message}</Form.Control.Feedback>}
                             </Col>
                             <Col md={2}>
                                 <Form.Label className="small fw-bold text-muted mb-1">Rộng tối thiểu (Nếu có)</Form.Label>
-                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_width_min', positiveNumberRule)} placeholder="> 0" disabled={diabledLeaf} isInvalid={!!errors.leaf_width_min} />
+                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_width_min', 
+                                {
+                                    ...positiveNumberRule,
+                                    onChange: () => trigger('leaf_width_max') 
+                                })}  disabled={diabledLeaf} isInvalid={!!errors.leaf_width_min} />
                                 {errors.leaf_width_min && <Form.Control.Feedback type="invalid">{errors.leaf_width_min.message}</Form.Control.Feedback>}
                             </Col>
                             <Col md={2}>
                                 <Form.Label className="small fw-bold text-muted mb-1">Rộng tối đa (Nếu có)</Form.Label>
-                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_width_max', positiveNumberRule)} placeholder="> 0" disabled={diabledLeaf} isInvalid={!!errors.leaf_width_max} /> 
+                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_width_max', maxNumberRule('leaf_width_min'))}  disabled={diabledLeaf} isInvalid={!!errors.leaf_width_max} /> 
                                 {errors.leaf_width_max && <Form.Control.Feedback type="invalid">{errors.leaf_width_max.message}</Form.Control.Feedback>}
                             </Col>
                             <Col md={4}>
                                 <Form.Label className="small fw-bold text-muted mb-1">Chiều dài cuống (Nếu có)</Form.Label>
-                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_petiole_length', positiveNumberRule)} placeholder="> 0" disabled={diabledLeaf} isInvalid={!!errors.leaf_petiole_length} />
+                                <Form.Control size="sm" type="number" step="0.1" {...register('leaf_petiole_length', positiveNumberRule)}  disabled={diabledLeaf} isInvalid={!!errors.leaf_petiole_length} />
                                 {errors.leaf_petiole_length && <Form.Control.Feedback type="invalid">{errors.leaf_petiole_length.message}</Form.Control.Feedback>}
                             </Col>
                             <Col md={12}>
@@ -156,11 +190,15 @@ const MorphTab = ({ register, watch, status, setValue, control, errors, uiOption
                             </Col>
                             <Col md={3}>
                                 <Form.Label className="small fw-bold text-muted mb-1">Cao tối thiểu (Nếu có)</Form.Label>
-                                <Form.Control size="sm" type="number" step="0.1" {...register('stem_height_min', positiveNumberRule)} placeholder="> 0" disabled={diabledStem} />
+                                <Form.Control size="sm" type="number" step="0.1" {...register('stem_height_min',
+                                {
+                                    ...positiveNumberRule,
+                                    onChange: () => trigger('stem_height_max') 
+                                } )}  disabled={diabledStem} />
                             </Col>
                             <Col md={3}>
                                 <Form.Label className="small fw-bold text-muted mb-1">Cao tối đa (Nếu có)</Form.Label>
-                                <Form.Control size="sm" type="number" step="0.1" {...register('stem_height_max', positiveNumberRule)} placeholder="> 0" disabled={diabledStem} />
+                                <Form.Control size="sm" type="number" step="0.1" {...register('stem_height_max', maxNumberRule('stem_height_min') )}  disabled={diabledStem} />
                             </Col>
                             <Col md={12}>
                                 <Form.Label className="small fw-bold text-muted mb-1">Mô tả thêm</Form.Label>
@@ -194,8 +232,8 @@ const MorphTab = ({ register, watch, status, setValue, control, errors, uiOption
                                 {errors.flower_color && <Form.Control.Feedback type="invalid">{errors.flower_color.message}</Form.Control.Feedback>}
                             </Col>
                             <Col md={4}>
-                                <Form.Label className="small fw-bold mb-1">Số lượng cánh <span className="text-danger">*</span></Form.Label>
-                                <Form.Control size="sm" type="number" {...register('flower_petal_count', { required: hasFlower ? "Số lượng cánh hoa là bắt buộc" : false, min: { value: 1, message: 'Phải >= 1' } })} placeholder="> 0"   disabled={diabledFlower } isInvalid={!!errors.flower_petal_count} />
+                                <Form.Label className="small fw-bold mb-1">Số lượng cánh</Form.Label>
+                                <Form.Control size="sm" type="number" {...register('flower_petal_count', { valueAsNumber: true, validate: value => { return (hasFlower && value) ? (value >= 0 ? true : "Phải là số dương") : true } })}    disabled={diabledFlower } isInvalid={!!errors.flower_petal_count} />
                                 {errors.flower_petal_count && <Form.Control.Feedback type="invalid">{errors.flower_petal_count.message}</Form.Control.Feedback>}
                             </Col>
                             <Col md={12}>

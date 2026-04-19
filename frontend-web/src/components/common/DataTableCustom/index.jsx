@@ -7,7 +7,8 @@ import Loading from '../Loading';
 const DataTableCustom = ({ 
     title, columns, data, loading, totalRows, 
     handlePerRowsChange, handlePageChange, 
-    onAdd, onImport, onSearch, isExcelable= false
+    onAdd, onImport, onSearch, isExcelable= false,
+    placeholderSearch
 }) => {
     const [searchText, setSearchText] = useState('');
 
@@ -75,7 +76,7 @@ const DataTableCustom = ({
                 <div className="d-flex gap-2">
                     <InputGroup style={{ width: '300px' }}>
                         <Form.Control 
-                            placeholder="Tìm kiếm theo mã, tên khoa học, tên tiếng Việt..." 
+                            placeholder={placeholderSearch || "Mã, tên khoa học, tên tiếng Việt..."}
                             className="bg-light"
                             value={searchText}
                             onChange={handleSearchChange}

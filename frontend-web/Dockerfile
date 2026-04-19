@@ -15,6 +15,9 @@ ENV VITE_API_URL=$VITE_API_URL
 ARG VITE_BACKEND_URL
 ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
 
+ARG VITE_API_AI_URL
+ENV VITE_API_AI_URL=$VITE_API_AI_URL
+
 # Lệnh build của Vite (sẽ sinh ra thư mục /app/dist)
 RUN npm run build
 

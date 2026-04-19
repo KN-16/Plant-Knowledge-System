@@ -17,7 +17,7 @@ const ImageManagerTab = ({
     const fileInputRef = useRef(null);
     const [uploadTargetPart, setUploadTargetPart] = useState('');
     const [previewImage, setPreviewImage] = useState(null);
-    const BACKEND_URL = import.meta.env.BACKEND_URL || 'http://localhost:3000'; // Đổi lại port backend của bạn
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'; // Đổi lại port backend của bạn
     const detailMode = status === 'detail';
     const getImageUrl = (path) => {
         if (!path) return '/default-plant.png'; 

@@ -1,4 +1,4 @@
-:root {
+/* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -65,4 +65,24 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+} */
+
+/* Ẩn toàn bộ placeholder khi ô input/textarea bị khóa (disabled) trong chế độ xem chi tiết */
+input:disabled::placeholder,
+textarea:disabled::placeholder,
+select:disabled::placeholder {
+  color: transparent !important;
+}
+
+/* Nếu bạn dùng React-Select hay SmartSelect có class riêng, có thể thêm vào đây */
+.form-control:disabled::placeholder {
+  color: transparent !important;
+}
+
+[id] {
+  scroll-margin-top: 62px;
+}
+
+html {
+  scroll-behavior: smooth;
 }

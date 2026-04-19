@@ -5,8 +5,8 @@ import Counter from './Counter.js';
 import Account from './Account.js';
 import { Family, Genus, Species } from './Taxonomy.js';
 import Variety from './Variety.js';
-import { MorphologyLeaf, MorphologyFlower, MorphologyStem } from './Morphology.js';
-import { PlantImage, KnowledgeChunk } from './AI.js';
+import { MorphologyLeaf, MorphologyFlower, MorphologyStem, MorphologyFruit } from './Morphology.js';
+import { PlantImage } from './AI.js';
 import { Distribution, Province } from './geoDistributions.js';
 
 // --- THIẾT LẬP QUAN HỆ (ASSOCIATIONS) ---
@@ -30,6 +30,8 @@ Variety.hasOne(MorphologyStem, { foreignKey: 'variety_id' });
 MorphologyStem.belongsTo(Variety, { foreignKey: 'variety_id' });
 Variety.hasOne(MorphologyFlower, { foreignKey: 'variety_id' });
 MorphologyFlower.belongsTo(Variety, { foreignKey: 'variety_id' });
+Variety.hasOne(MorphologyFruit, { foreignKey: 'variety_id' });
+MorphologyFruit.belongsTo(Variety, { foreignKey: 'variety_id' });
 
 // 5. Variety -> Distribution (1-N) 
 Variety.hasMany(Distribution, { foreignKey: 'variety_id' });
@@ -43,18 +45,6 @@ Distribution.belongsTo(Province, { foreignKey: 'province_id' });
 Variety.hasMany(PlantImage, { foreignKey: 'variety_id' });
 PlantImage.belongsTo(Variety, { foreignKey: 'variety_id' });
 
-Variety.hasMany(KnowledgeChunk, { foreignKey: 'variety_id' });
-KnowledgeChunk.belongsTo(Variety, { foreignKey: 'variety_id' });
-
-// --- KẾT THÚC THIẾT LẬP QUAN HỆ ---
-
-// Đồng bộ tất cả models với database (nếu cần)
-if (process.env.NODE_ENV !== 'production') {
-    sequelize.sync({ alter: true })
-    .then(() => console.log("All models synchronized with database."))
-    .catch(err => console.error("Error synchronizing models:", err));
-}
-
 // Xuất tất cả models và sequelize instance
 export {
     sequelize,
@@ -66,9 +56,9 @@ export {
     MorphologyLeaf,
     MorphologyStem,
     MorphologyFlower,
+    MorphologyFruit,
     Distribution,
     Province,
     PlantImage,
-    KnowledgeChunk,
     Account,
 };

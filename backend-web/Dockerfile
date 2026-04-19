@@ -13,5 +13,5 @@ COPY . .
 EXPOSE 3000
 
 # Lệnh chạy BE (Tùy theo cấu hình package.json của bạn)
-# CMD ["npm", "start"]
-CMD ["sh", "-c", "node seed.js && npm start"]
+CMD ["npm", "start"]
+# CMD ["sh", "-c", "node seed.js && npm start"]

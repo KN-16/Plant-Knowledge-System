@@ -1,0 +1,94 @@
+/* HomePage.css */
+
+/* Utilities */
+.transition-all {
+    transition: all 0.3s ease-in-out;
+}
+
+.tracking-wider {
+    letter-spacing: 0.05em;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+/* Hover effects */
+.hover-bg-white:hover {
+    background-color: #ffffff !important;
+    color: #198754 !important;
+}
+
+.hover-text-success:hover {
+    color: #198754 !important;
+}
+
+.hover-bg-success-light:hover {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+/* Text Shadows */
+.text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Search Bar Styling */
+.search-bar-container {
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.search-bar-container:focus-within {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-2px);
+    border-color: #198754;
+}
+
+.search-bar-container input:focus {
+    outline: none;
+    box-shadow: none;
+    background-color: transparent !important;
+}
+
+/* Fix kích thước nút camera trên mobile */
+@media (max-width: 576px) {
+    .btn-camera {
+        width: 40px !important;
+        height: 40px !important;
+        padding: 0 !important;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Stat Cards */
+.stat-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Animations */
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.animate-bounce {
+    animation: bounce 2s infinite ease-in-out;
+}

@@ -15,6 +15,7 @@ const Variety = sequelize.define('Variety', {
     // Enum fields
     life_form: { type: DataTypes.ENUM(...RAW_ENUMS.LIFE_FORM) },
     
+    view_count: { type: DataTypes.INTEGER, defaultValue: 0 },
     distinctive_feature: { type: DataTypes.TEXT },
     description: { type: DataTypes.TEXT },
     is_flowering: { type: DataTypes.BOOLEAN, defaultValue: false },

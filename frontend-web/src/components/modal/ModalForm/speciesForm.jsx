@@ -53,7 +53,7 @@ const SpeciesModalForm = ({ show, onHide, initialData, onSuccess, type = "specie
                 setGenusList(generaData);
                 setGenusOptions(generaData.map(g => ({
                     value: g.genus_id,
-                    label: `${g.scientific_name} - ${g.code}`,
+                    label: `${g.scientific_name} - ${g.vietnamese_name} - ${g.code}`,
                     // Lưu kèm thông tin Family của Genus này để auto-fill
                     family_id: g.family_id,
                     Family: familiesData.find(f => f.family_id === g.family_id)
@@ -63,7 +63,7 @@ const SpeciesModalForm = ({ show, onHide, initialData, onSuccess, type = "specie
                 setFamilyList(familiesData);
                 setFamilyOptions(familiesData.map(f => ({
                     value: f.family_id,
-                    label: `${f.scientific_name} - ${f.code}`,
+                    label: `${f.scientific_name} - ${f.vietnamese_name} - ${f.code}`,
                 })));
 
             } catch (error) {
@@ -99,7 +99,7 @@ const SpeciesModalForm = ({ show, onHide, initialData, onSuccess, type = "specie
         if (data.Genus) {
             data.genus_select = {
                 value: data.Genus.genus_id,
-                label: `${data.Genus.scientific_name} - ${data.Genus.code}`,
+                label: `${data.Genus.scientific_name} - ${data.Genus.vietnamese_name} - ${data.Genus.code}`,
                 // Quan trọng: Truyền Family info theo để logic hiển thị hoạt động đúng
                 Family: data.Genus.Family 
             };
@@ -116,7 +116,7 @@ const SpeciesModalForm = ({ show, onHide, initialData, onSuccess, type = "specie
         if (refFamily) {
             data.family_select = {
                 value: refFamily.family_id,
-                label: `${refFamily.scientific_name} - ${refFamily.code}`
+                label: `${refFamily.scientific_name} - ${refFamily.vietnamese_name} - ${refFamily.code}`,
             };
             data.new_family_scientific_name = refFamily.scientific_name || '';
             data.new_family_vietnamese_name = refFamily.vietnamese_name || '';
@@ -252,25 +252,24 @@ const SpeciesModalForm = ({ show, onHide, initialData, onSuccess, type = "specie
 
                         <Col md={6}>
                             <Form.Label>Tên đồng danh (Synonyms)</Form.Label>
-                            <Form.Control {...register('synonyms')} as="textarea" rows={2} disabled={status === 'detail'} />
+                            <Form.Control {...register('synonyms')} disabled={status === 'detail'} />
                         </Col>
                         <Col md={6}>
                             <Form.Label>Tên gọi khác (Other names)</Form.Label>
-                            <Form.Control {...register('other_names')} as="textarea" rows={2} disabled={status === 'detail'} />
-                        </Col>
-                        <Col md={12}>
-                            <Form.Label className="fw-bold">Công dụng (Uses)</Form.Label>
-                            <Form.Control {...register('uses')} as="textarea" rows={3} disabled={status === 'detail'} />
-                        </Col>
-                        <Col md={12}>
-                            <Form.Label>Mô tả chi tiết</Form.Label>
-                            <Form.Control {...register('description')} as="textarea" rows={3} disabled={status === 'detail'} />
+                            <Form.Control {...register('other_names')} disabled={status === 'detail'} />
                         </Col>
                         <Col md={12}>
                             <Form.Label>Tác giả (Authority)</Form.Label>
                             <Form.Control {...register('authority')} disabled={status === 'detail'} />
                         </Col>
-
+                        <Col md={12}>
+                            <Form.Label className="fw-bold">Công dụng (Uses)</Form.Label>
+                            <Form.Control {...register('uses')} as="textarea" rows={2} disabled={status === 'detail'} />
+                        </Col>
+                        <Col md={12}>
+                            <Form.Label>Mô tả chi tiết</Form.Label>
+                            <Form.Control {...register('description')} as="textarea" rows={2} disabled={status === 'detail'} />
+                        </Col>
                         {/* ================= KHU VỰC THAM CHIẾU (CHI & HỌ) ================= */}
                         <Col md={12} className="mt-4"><h6 className="text-success fw-bold border-bottom pb-2">II. Thông tin Phân loại (Tham chiếu)</h6></Col>
 

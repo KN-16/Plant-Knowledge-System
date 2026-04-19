@@ -1,447 +1,6 @@
-// // backend-web/controllers/taxonomyController.js
-
-// import { Family, Genus, Species, sequelize } from '../models/index.js';
-// import { Op } from 'sequelize';
-// import xlsx from 'xlsx';
-// import fs from 'fs';
-// import path from 'path';
-// import e from 'express';
-
-// // --- Helper: Lấy Model dựa trên type ---
-// const getModelByType = (type) => {
-//     switch (type) {
-//         case 'families': return Family;
-//         case 'genera': return Genus;
-//         case 'species': return Species;
-//         default: return null;
-//     }
-// };
-// const enableTransaction = process.env.ENABLE_TRANSACTION === 'true';
-// // --- API: Lấy danh sách (Có phân trang, search, sort) ---
-// export const getList = async (req, res, next) => {
-//     try {
-//         const { type } = req.params;
-//         const Model = getModelByType(type);
-//         if (!Model) return res.status(400).json({ message: "Invalid type" });
-
-//         const { page = 1, limit = 10, search = '', sort = 'createdAt', order = 'DESC' } = req.query;
-//         const offset = (page - 1) * limit;
-
-//         const where = {};
-//         if (search) {
-//             where[Op.or] = [
-//                 { scientific_name: { [Op.iLike]: `%${search}%` } },
-//                 { code: { [Op.iLike]: `%${search}%` } }
-//             ];
-//             if (Model.rawAttributes.vietnamese_name) {
-//                 where[Op.or].push({ vietnamese_name: { [Op.iLike]: `%${search}%` } });
-//             }
-//         }
-
-//         // Include quan hệ để hiển thị tên tham chiếu (VD: Loài thuộc Chi nào)
-//         let include = [];
-//         if (type === 'genera') include = [{ model: Family, attributes: ['family_id', 'scientific_name', 'code'] }];
-//         if (type === 'species') include = [
-//             { model: Genus, 
-//                 attributes: ['genus_id', 'scientific_name', 'vietnamese_name', 'code']
-//             , include: [{ model: Family, attributes: ['family_id', 'scientific_name', 'code', 'vietnamese_name'] }] }
-//         ];
-
-//         const { count, rows } = await Model.findAndCountAll({
-//             where,
-//             include,
-//             limit: parseInt(limit),
-//             offset: parseInt(offset),
-//             order: [[sort, order]]
-//         });
-
-//         res.json({
-//             data: rows,
-//             pagination: {
-//                 total: count,
-//                 page: parseInt(page),
-//                 totalPages: Math.ceil(count / limit)
-//             }
-//         });
-//     } catch (error) {
-//         next(error);
-//     }
-// };
-
-// // --- API: Tìm kiếm cho Select (Dropdown) ---
-// export const searchForSelect = async (req, res, next) => {
-//     try {
-//         const { type } = req.params;
-//         const { q = '' } = req.query;
-//         const Model = getModelByType(type);
-        
-//         if (!Model) return res.status(400).json({ message: "Invalid type" });
-
-//         const data = await Model.findAll({
-//             where: {
-//                 scientific_name: { [Op.iLike]: `%${q}%` }
-//             },
-//             limit: 20,
-//             attributes: ['family_id', 'genus_id', 'species_id', 'scientific_name', 'code'] // Lấy ID động sau
-//         });
-
-//         // Map data để frontend dễ dùng
-//         const result = data.map(item => {
-//             const id = item.family_id || item.genus_id || item.species_id;
-//             return {
-//                 value: id,
-//                 label: `${item.code} - ${item.scientific_name}`,
-//                 details: item // Trả về để frontend disable field nếu cần
-//             };
-//         });
-
-//         res.json(result);
-//     } catch (error) {
-//         next(error);
-//     }
-// };
-
-// // --- API: Thêm mới ---
-// export const createItem = async (req, res, next) => {
-//     try {
-//         const { type } = req.params;
-//         const Model = getModelByType(type);
-        
-//         const t = enableTransaction ? await sequelize.transaction() : null;
-//         try {
-//             const item = await Model.create(req.body, { transaction: t });
-//             if (t) await t.commit();
-//             return res.status(201).json({ message: "Tạo thành công", data: item });
-//         } catch (error) {
-//             if (t) await t.rollback();
-//             throw error;
-//         }
-    
-//     } catch (error) {
-//         console.error(error);
-//         next(error);
-//     }
-// };
-
-// // --- API: Cập nhật ---
-// export const updateItem = async (req, res, next) => {
-//     try {
-//         const { type, id } = req.params;
-//         const Model = getModelByType(type);
-        
-//         const item = await Model.findByPk(id);
-//         if (!item) return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
-
-//         await item.update(req.body);
-//         res.json({ message: "Cập nhật thành công", data: item });
-//     } catch (error) {
-//         next(error);
-//     }
-// };
-
-// // --- API: Xóa ---
-// export const deleteItem = async (req, res, next) => {
-//     try {
-//         const { type, id } = req.params;
-//         const Model = getModelByType(type);
-//         const pk = Model.primaryKeyAttribute;
-
-//         const item = await Model.findByPk(id);
-//         if (!item) return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
-//         await item.destroy();
-//         res.json({ message: "Xóa thành công" });
-//     } catch (error) {
-//         next(error);
-//     }
-// };
-
-// // Fetch family/genus/species list without pagination (for dropdowns, etc.)
-// export const fetchAllItems = async (req, res, next) => {
-//     try {
-//         const { type } = req.params;
-//         const Model = getModelByType(type);
-//         if (!Model) return res.status(400).json({ message: "Invalid type" });
-//         let includeConfig = [];
-
-//         if (type === 'species') {
-//         includeConfig = [
-//             {
-//             model: Genus,
-//             attributes: ['genus_id', 'scientific_name', 'code'],
-//             include: [
-//                 {
-//                 model: Family,
-//                 attributes: ['family_id', 'scientific_name', 'code']
-//                 }
-//             ]
-//             }
-//         ];
-//         }
-//         if (type === 'genera') {
-//         includeConfig = [
-//             {
-//             model: Family,
-//             attributes: ['family_id', 'scientific_name', 'code']
-//             }
-//         ];
-//         }
-
-//         // Có thể thêm include để lấy tên tham chiếu nếu cần
-//         const items = await Model.findAll({
-//             order: [['scientific_name', 'ASC']],
-//             include: includeConfig
-//         });
-
-//         res.json(items);
-//     } catch (error) {
-//         next(error);
-//     }
-// };
-
-// // Genus
-// // --- API: Thêm mới ---
-// export const createGenus = async (req, res, next) => {
-//     try {
-//         const Model = getModelByType("genera");
-        
-//         const t = enableTransaction ? await sequelize.transaction() : null;
-//         try {
-//             const fam=(req.body.family_id === "new") ? await Family.create(req.body.new_family, { transaction: t }) : await Family.findByPk(req.body.family_id, { transaction: t });
-//             if (!fam) 
-//             {
-//                 if (t) await t.rollback();
-//                 return res.status(404).json({ message: "Không tìm thấy dữ liệu họ thực vật" });
-//             }
-//             delete req.body.new_family;
-//             // Trim dữ liệu string
-//             for (const key in req.body) {
-//                 if (typeof req.body[key] === 'string') req.body[key] = req.body[key].trim();
-//             }
-//             req.body.family_id = fam.family_id;
-//             const item = await Model.create({ ...req.body}, { transaction: t });
-//             if (t) await t.commit();
-//             return res.status(201).json({ message: "Tạo thành công", data: item });
-//         } catch (error) {
-//             if (t) await t.rollback();
-//             throw error;
-//         }
-    
-//     } catch (error) {
-//         console.error(error);
-//         next(error);
-//     }
-// };
-// // Cap nhat Genus
-// export const updateGenus = async (req, res, next) => {
-//     try {
-//             const { id } = req.params;
-//             const Model = getModelByType("genera");
-            
-//             const t = enableTransaction ? await sequelize.transaction() : null;
-//         try {
-//             const item = await Model.findByPk(id, { transaction: t });
-//             if (!item) 
-//             {
-//                 if (t) await t.rollback();
-//                 return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
-//             }
-
-//             const fam=(req.body.family_id === "new") ? await Family.create(req.body.new_family, { transaction: t }) : await Family.findByPk(req.body.family_id, { transaction: t });
-//             if (!fam) 
-//             {
-//                 if (t) await t.rollback();
-//                 return res.status(404).json({ message: "Không tìm thấy dữ liệu họ thực vật" });
-//             }
-//             delete req.body.new_family;
-//             // Trim dữ liệu string
-//             for (const key in req.body) {
-//                 if (typeof req.body[key] === 'string') req.body[key] = req.body[key].trim();
-//             }
-//             req.body.family_id = fam.family_id;
-//             await item.update(req.body, { transaction: t });
-//             if (t) await t.commit();
-//             return res.status(201).json({ message: "Cập nhật thành công", data: item });
-//         } catch (error) {
-//             if (t) await t.rollback();
-//             throw error;
-//         }
-//     }  catch (error) {
-//         console.error(error);
-//         next(error);
-//     }
-// }
-
-// // Species
-// // --- API: Thêm mới ---
-// export const createSpecies = async (req, res, next) => {
-//     try {
-//         const Model = getModelByType("species");
-        
-//         const t = enableTransaction ? await sequelize.transaction() : null;
-//         try {
-
-//             if (req.body.genus_id==="new") 
-//             {
-//                 const fam=(req.body.new_genus.family_id === "new") ? await Family.create(req.body.new_genus.new_family, { transaction: t }) : await Family.findByPk(req.body.new_genus.family_id, { transaction: t });
-//                 delete req.body.new_genus.new_family;
-//                 if (!fam) 
-//                 {
-//                     if (t) await t.rollback();
-//                     return res.status(404).json({ message: "Không tìm thấy dữ liệu họ thực vật" });
-//                 }
-//                 req.body.new_genus.family_id = fam.family_id;
-//                 const genus= await Genus.create(req.body.new_genus, { transaction: t });
-//                 delete req.body.new_genus.genus_id;
-//                 req.body.genus_id = genus.genus_id;
-//             }
-//             else 
-//                 {
-//                 const genus=await Genus.findByPk(req.body.genus_id, { transaction: t });
-//                 if (!genus) 
-//                 {
-//                     if (t) await t.rollback();
-//                     return res.status(404).json({ message: "Không tìm thấy dữ liệu chi" });
-//                 }
-//                 }
-
-//             const item = await Model.create({ ...req.body}, { transaction: t });
-//             if (t) await t.commit();
-//             return res.status(201).json({ message: "Tạo thành công", data: item });    
-//         } catch (error) {
-//             if (t) await t.rollback();
-//             throw error;
-//         }
-//     } catch (error) {
-//         console.error(error);
-//         next(error);
-//     }
-// };
-
-// // Cap nhat Species
-// export const updateSpecies = async (req, res, next) => {
-//     try {
-//             const { id } = req.params;
-//             const Model = getModelByType("species");
-            
-            
-//             const t = enableTransaction ? await sequelize.transaction() : null;
-//         try {
-//             const item = await Model.findByPk(id, { transaction: t });
-//             if (!item) 
-//             {
-//                 if (t) await t.rollback();
-//                 return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
-//             }
-//             if (req.body.genus_id==="new") 
-//             {
-//                 const fam=(req.body.new_genus.family_id === "new") ? await Family.create(req.body.new_genus.new_family, { transaction: t }) : await Family.findByPk(req.body.new_genus.family_id, { transaction: t });
-//                 delete req.body.new_genus.new_family;
-//                 if (!fam) 
-//                 {
-//                     if (t) await t.rollback();
-//                     return res.status(404).json({ message: "Không tìm thấy dữ liệu họ thực vật" });
-//                 }
-//                 req.body.new_genus.family_id = fam.family_id;
-//                 const genus= await Genus.create(req.body.new_genus, { transaction: t });
-//                 delete req.body.new_genus.genus_id;
-//                 req.body.genus_id = genus.genus_id;
-//             }
-//             else 
-//             {
-//             const genus=await Genus.findByPk(req.body.genus_id, { transaction: t });
-//             if (!genus) 
-//             {
-//                 if (t) await t.rollback();
-//                 return res.status(404).json({ message: "Không tìm thấy dữ liệu chi" });
-//             }
-//             }
-//             await item.update(req.body, { transaction: t });
-//             if (t) await t.commit();
-//             return res.status(201).json({ message: "Cập nhật thành công", data: item });
-//         } catch (error) {
-//             if (t) await t.rollback();
-//             throw error;
-//         }
-//     }  catch (error) {
-//         console.error(error);
-//         next(error);
-//     }
-// }
-
-// // // --- API: Import Excel (Xử lý lỗi từng dòng) ---
-// // export const importExcel = async (req, res, next) => {
-// //     if (!req.file) return res.status(400).json({ message: "Vui lòng tải file lên" });
-
-// //     const { type } = req.params;
-// //     const Model = getModelByType(type);
-    
-// //     // Logic Mapping cột Excel -> Database Field (Ví dụ)
-// //     // Cần chuẩn hóa file excel mẫu trước
-    
-// //     const workbook = xlsx.readFile(req.file.path);
-// //     const sheet = workbook.Sheets[workbook.SheetNames[0]];
-// //     const rows = xlsx.utils.sheet_to_json(sheet);
-
-// //     let success = 0;
-// //     let fail = 0;
-// //     const errorRows = [];
-
-// //     for (const row of rows) {
-// //         const t = await sequelize.transaction();
-// //         try {
-// //             // Logic xử lý riêng cho từng bảng (Ví dụ Species cần tìm Genus ID)
-// //             let payload = { ...row };
-            
-// //             if (type === 'species') {
-// //                 const genusName = row['Genus']; // Cột trong Excel
-// //                 if (genusName) {
-// //                     const genus = await Genus.findOne({ where: { scientific_name: genusName } });
-// //                     if (!genus) throw new Error(`Không tìm thấy Chi: ${genusName}`);
-// //                     payload.genus_id = genus.genus_id;
-// //                 }
-// //             }
-// //             // Tương tự cho Genus -> Family
-
-// //             await Model.create(payload, { transaction: t });
-// //             await t.commit();
-// //             success++;
-// //         } catch (err) {
-// //             await t.rollback();
-// //             fail++;
-// //             errorRows.push({ ...row, Error: err.message });
-// //         }
-// //     }
-
-// //     // Tạo file báo cáo lỗi nếu có
-// //     let errorFileUrl = null;
-// //     if (errorRows.length > 0) {
-// //         const newWb = xlsx.utils.book_new();
-// //         const newWs = xlsx.utils.json_to_sheet(errorRows);
-// //         xlsx.utils.book_append_sheet(newWb, newWs, "Errors");
-// //         const fileName = `errors_${Date.now()}.xlsx`;
-// //         xlsx.writeFile(newWb, path.join('uploads/format-excel-data', fileName));
-// //         errorFileUrl = `/uploads/format-excel-data/${fileName}`;
-// //     }
-
-// //     // Xóa file temp
-// //     fs.unlinkSync(req.file.path);
-
-// //     res.json({
-// //         success,
-// //         fail,
-// //         total: rows.length,
-// //         errorFileUrl
-// //     });
-// // };
-
-
-
-
-
-
 // backend-web/controllers/taxonomyController.js
 
-import { Family, Genus, Species, sequelize } from '../models/index.js';
+import { Family, Genus, Species, sequelize, Variety, PlantImage} from '../models/index.js';
 import { Op } from 'sequelize';
 
 const getModelByType = (type) => {
@@ -465,25 +24,65 @@ export const getList = async (req, res, next) => {
         const offset = (page - 1) * limit;
 
         const where = {};
+        let searchConditions = []; // Mảng chứa tất cả các điều kiện OR
+        let include = []; // Mảng chứa tất cả các bảng con
+
+        // 1. Gom các điều kiện tìm kiếm của bảng hiện tại (bảng gốc)
         if (search) {
-            where[Op.or] = [
+            searchConditions.push(
                 { scientific_name: { [Op.iLike]: `%${search}%` } },
                 { code: { [Op.iLike]: `%${search}%` } }
-            ];
+            );
             if (Model.rawAttributes.vietnamese_name) {
-                where[Op.or].push({ vietnamese_name: { [Op.iLike]: `%${search}%` } });
+                searchConditions.push({ vietnamese_name: { [Op.iLike]: `%${search}%` } });
+            }
+        }
+        // 2. Xây dựng Include và add thêm điều kiện OR cho bảng Genera (Chi)
+        if (type === 'genera') {
+            include = [
+                { 
+                    model: Family, 
+                    attributes: ['family_id', 'scientific_name', 'code', 'vietnamese_name'] 
+                }
+            ];
+            
+            if (search) {
+                searchConditions.push(
+                    { '$Family.scientific_name$': { [Op.iLike]: `%${search}%` } }
+                );
+            if (Family.rawAttributes.vietnamese_name) {
+                    searchConditions.push({ '$Family.vietnamese_name$': { [Op.iLike]: `%${search}%` } });
+                }
             }
         }
 
-        let include = [];
-        if (type === 'genera') include = [{ model: Family, attributes: ['family_id', 'scientific_name', 'code'] }];
-        if (type === 'species') include = [
-            { 
-                model: Genus, 
-                attributes: ['genus_id', 'scientific_name', 'vietnamese_name', 'code'],
-                include: [{ model: Family, attributes: ['family_id', 'scientific_name', 'code', 'vietnamese_name'] }] 
+        // 3. Xây dựng Include và add thêm điều kiện OR cho bảng Species (Loài)
+        if (type === 'species') {
+            include = [
+                { 
+                    model: Genus, 
+                    attributes: ['genus_id', 'scientific_name', 'vietnamese_name', 'code'],
+                    include: [{ 
+                        model: Family, 
+                        attributes: ['family_id', 'scientific_name', 'code', 'vietnamese_name'] 
+                    }]  
+                }
+            ];
+            
+            if (search) {
+                searchConditions.push(
+                    { '$Genus.scientific_name$': { [Op.iLike]: `%${search}%` } }
+                );
+                if (Genus.rawAttributes.vietnamese_name) {
+                    searchConditions.push({ '$Genus.vietnamese_name$': { [Op.iLike]: `%${search}%` } });
+                }
             }
-        ];
+        }
+
+        // 4. Chốt hạ: Gắn mảng OR khổng lồ vào biến where gốc
+        if (search && searchConditions.length > 0) {
+            where[Op.or] = searchConditions;
+        }
 
         const { count, rows } = await Model.findAndCountAll({
             where,
@@ -501,32 +100,6 @@ export const getList = async (req, res, next) => {
                 totalPages: Math.ceil(count / limit)
             }
         });
-    } catch (error) {
-        next(error);
-    }
-};
-
-// --- API: Tìm kiếm cho Select ---
-export const searchForSelect = async (req, res, next) => {
-    try {
-        const { type } = req.params;
-        const { q = '' } = req.query;
-        const Model = getModelByType(type);
-        if (!Model) return res.status(400).json({ message: "Invalid type" });
-
-        const data = await Model.findAll({
-            where: { scientific_name: { [Op.iLike]: `%${q}%` } },
-            limit: 20,
-            attributes: ['family_id', 'genus_id', 'species_id', 'scientific_name', 'code']
-        });
-
-        const result = data.map(item => ({
-            value: item.family_id || item.genus_id || item.species_id,
-            label: `${item.code} - ${item.scientific_name}`,
-            details: item
-        }));
-
-        res.json(result);
     } catch (error) {
         next(error);
     }
@@ -573,14 +146,48 @@ export const deleteItem = async (req, res, next) => {
     try {
         const { type, id } = req.params;
         const Model = getModelByType(type);
+        
+        // 1. Kiểm tra dữ liệu có tồn tại không
         const item = await Model.findByPk(id, { transaction: t });
         if (!item) {
             if (t) await t.rollback();
-            return res.status(404).json({ message: "Không tìm thấy dữ liệu" });
+            return res.status(404).json({ success: false, message: "Không tìm thấy dữ liệu" });
         }
+
+        // 2. THUẬT TOÁN MỚI: Quét kiểm tra dữ liệu cấp dưới (1 cấp)
+        let hasChildren = false;
+        let childName = "";
+
+        // Dựa vào type để đếm số lượng bản ghi con
+        // (Tùy thuộc vào cách bạn đặt tên biến type trên route là số ít hay số nhiều để điều chỉnh case cho đúng)
+        if ( type === 'families') {
+            const childCount = await Genus.count({ where: { family_id: id }, transaction: t });
+            if (childCount > 0) { hasChildren = true; childName = "Chi (Genus)"; }
+            
+        } else if ( type === 'genera') {
+            const childCount = await Species.count({ where: { genus_id: id }, transaction: t });
+            if (childCount > 0) { hasChildren = true; childName = "Loài (Species)"; }
+            
+        } else if (type === 'species') {
+            const childCount = await Variety.count({ where: { species_id: id }, transaction: t });
+            if (childCount > 0) { hasChildren = true; childName = "Biến thể (Variety)"; }
+        }
+
+        // Nếu có con, chặn việc xóa và trả về lỗi 400 (Bad Request)
+        if (hasChildren) {
+            if (t) await t.rollback();
+            return res.status(400).json({ 
+                success: false, 
+                message: `Không thể xóa! Dữ liệu này đang chứa ${childName} trực thuộc. Vui lòng xóa dữ liệu cấp dưới trước.` 
+            });
+        }
+
+        // 3. Nếu an toàn (không có con), tiến hành xóa
         await item.destroy({ transaction: t });
+        
         if (t) await t.commit();
-        res.json({ message: "Xóa thành công" });
+        res.json({ success: true, message: "Xóa thành công" });
+        
     } catch (error) {
         if (t) await t.rollback();
         next(error);
@@ -738,10 +345,10 @@ export const fetchAllItems = async (req, res, next) => {
         let includeConfig = [];
 
         if (type === 'species') {
-            includeConfig = [{ model: Genus, attributes: ['genus_id', 'scientific_name', 'code'], include: [{ model: Family, attributes: ['family_id', 'scientific_name', 'code'] }] }];
+            includeConfig = [{ model: Genus, attributes: ['genus_id', 'scientific_name', 'code', 'vietnamese_name'], include: [{ model: Family, attributes: ['family_id', 'scientific_name', 'code', 'vietnamese_name'] }] }];
         }
         if (type === 'genera') {
-            includeConfig = [{ model: Family, attributes: ['family_id', 'scientific_name', 'code'] }];
+            includeConfig = [{ model: Family, attributes: ['family_id', 'scientific_name', 'code', 'vietnamese_name'] }];
         }
 
         const items = await Model.findAll({
@@ -752,5 +359,95 @@ export const fetchAllItems = async (req, res, next) => {
         res.json(items);
     } catch (error) {
         next(error);
+    }
+};
+
+export const getTaxonomyTree = async (req, res) => {
+    try {
+        // Nhận 1 trong 4 tham số từ body (hoặc query)
+        const { family_id, genus_id, species_id, variety_id } = req.query; 
+
+        // Khởi tạo điều kiện rỗng
+        let targetFamilyId = null;
+        let targetGenusId = null;
+        let targetSpeciesId = null;
+
+        // Xử lý logic ngược từ dưới lên để xác định điểm neo (anchor)
+        if (variety_id) {
+            // Nếu là variety_id, tìm ra species_id của nó để lấy "các anh em chung loài"
+            const variety = await Variety.findByPk(variety_id, { include: [{ model: Species, attributes: ['species_id'] }] });
+            if (!variety) {
+                return res.status(404).json({ success: false, message: "Không tìm thấy biến thể này." });
+            }
+            targetSpeciesId = variety.Species.species_id;
+        } else if (species_id) {
+            targetSpeciesId = species_id;
+        } else if (genus_id) {
+            targetGenusId = genus_id;
+        } else if (family_id) {
+            targetFamilyId = family_id;
+        } else {
+            return res.status(400).json({ success: false, message: "Vui lòng cung cấp ID hợp lệ." });
+        }
+
+        // Khởi tạo cấu trúc JOIN lồng nhau (Eager Loading) của Sequelize
+        let includeHierarchy = [
+            {
+                model: Genus,
+                required: !!(targetGenusId || targetSpeciesId),
+                include: [
+                    {
+                        model: Species,
+                        as: 'Species',
+                        required: !!targetSpeciesId,
+                        include: [
+                            {
+                                model: Variety,
+                                as: 'Varieties',
+                                include: [{ 
+                                    model: PlantImage, 
+                                    as: 'PlantImages', 
+                                    attributes: ['url'], // Chỉ lấy url cho nhẹ
+                                    limit: 1 // Lấy 1 ảnh làm thumbnail
+                                }]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Ép điều kiện WHERE vào đúng cấp độ tương ứng
+        let familyWhere = {};
+        
+        if (targetFamilyId) {
+            familyWhere.family_id = targetFamilyId;
+        } 
+        if (targetGenusId) {
+            includeHierarchy[0].where = { genus_id: targetGenusId };
+        } 
+        if (targetSpeciesId) {
+            includeHierarchy[0].include[0].where = { species_id: targetSpeciesId };
+        }
+
+        // Truy vấn ra Cây (Tree)
+        const treeData = await Family.findAll({
+            where: familyWhere,
+            include: includeHierarchy,
+            order: [
+                ['scientific_name', 'ASC'],
+                [{ model: Genus }, 'scientific_name', 'ASC'],
+                [{ model: Genus }, { model: Species, as: 'Species' }, 'scientific_name', 'ASC']
+            ]
+        });
+
+        return res.status(200).json({
+            success: true,
+            data: treeData
+        });
+
+    } catch (error) {
+        console.error("Lỗi lấy Taxonomy Tree:", error);
+        return res.status(500).json({ success: false, message: "Lỗi máy chủ." });
     }
 };

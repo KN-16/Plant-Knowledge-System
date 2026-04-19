@@ -13,9 +13,3 @@ export const PlantImage= sequelize.define('PlantImage', {
     cnn_feature_vector: { type: DataTypes.ARRAY(DataTypes.FLOAT) }, // Vector đặc trưng CNN
     is_standard: { type: DataTypes.BOOLEAN, defaultValue: true }, // Có phải hình ảnh tiêu chuan AI khong
 }, { tableName: 'plant_images', timestamps: true });
-
-export const KnowledgeChunk= sequelize.define('KnowledgeChunk', {
-    knowledge_chunk_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    content: { type: DataTypes.TEXT, allowNull: false }, // Nội dung đoạn kiến thức
-    embedding_vector: { type: DataTypes.ARRAY(DataTypes.FLOAT) }, // Vector nhúng
-}, { tableName: 'knowledge_chunks', timestamps: true });

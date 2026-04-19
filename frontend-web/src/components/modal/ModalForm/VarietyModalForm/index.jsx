@@ -27,7 +27,7 @@ const VarietyModalForm = ({ show, onHide, initialData, onSuccess, status, uiOpti
 
     const [speciesOptions, setSpeciesOptions] = useState([]); // Dùng để lưu options Loài cho select
     const detailMode= status === 'detail';
-    const { register, handleSubmit, control, setValue, reset, watch, formState: { errors, isDirty}, setFocus  } = useForm(
+    const { register, handleSubmit, control, setValue, reset, watch, formState: { errors, isDirty}, setFocus, trigger  } = useForm(
         {
             mode: 'onTouched', 
             reValidateMode: 'onChange',
@@ -109,11 +109,9 @@ const VarietyModalForm = ({ show, onHide, initialData, onSuccess, status, uiOpti
             console.log(speciesOptionData);
             setSpeciesOptions(speciesOptionData.map(species => ({
                 value: species.species_id,
-                label: `${species.scientific_name} - ${species.code}`,
+                label: `${species.scientific_name} - ${species.vietnamese_name}`,
                 details: species,
-                code: species.code,
-                genus_scientific_name: species.Genus.scientific_name || '',
-                family_scientific_name: species.Genus.Family.scientific_name || ''
+                code: species.code
             })));
 
             if (initialData?.variety_id && status !== 'add') {
@@ -134,8 +132,9 @@ const VarietyModalForm = ({ show, onHide, initialData, onSuccess, status, uiOpti
                         is_fruiting: detail.is_fruiting,
                         species_select: detail.Species ? { 
                             value: detail.species_id, 
-                            label: `${detail.Species.scientific_name} - ${detail.Species.code}`,
-                            details: detail.Species
+                            label: `${detail.Species.scientific_name} - ${detail.Species.vietnamese_name}`,
+                            details: detail.Species,
+                            code: detail.code
                         } : null,
                         
                         // Khởi tạo trạng thái Switch dựa vào việc có data Morphology hay không
@@ -183,7 +182,7 @@ const VarietyModalForm = ({ show, onHide, initialData, onSuccess, status, uiOpti
             } else {
                 // Form Thêm mới
                 reset({ 
-                    variant_type: 'Phenotype', 
+                    variant_type: 'Cultivar', 
                     has_leaf_data: false, 
                     has_stem_data: false, 
                     has_flower_data: false 
@@ -229,7 +228,7 @@ const VarietyModalForm = ({ show, onHide, initialData, onSuccess, status, uiOpti
                 let obj = {};
                 let hasData = false;
                 Object.keys(data).forEach(k => {
-                    if (k.startsWith(`${prefix}_`) && data[k] !== '' && data[k] !== undefined) {
+                    if (k.startsWith(`${prefix}_`) && data[k] !== undefined) {
                         obj[k.replace(`${prefix}_`, '')] = data[k];
                         hasData = true;
                     }
@@ -422,7 +421,6 @@ const VarietyModalForm = ({ show, onHide, initialData, onSuccess, status, uiOpti
                                                                         options={speciesOptions}
                                                                         isDisabled={status === 'detail'|| loadingData}
                                                                         isNewable={false}
-                                                                         // Chỉnh sửa thì không cho đổi loài (vì liên quan đến Morphology), chỉ được chọn khi thêm mới
                                                                     />
                                                                     {error && <small className="text-danger">{error.message}</small>}
                                                                 </>
@@ -440,15 +438,31 @@ const VarietyModalForm = ({ show, onHide, initialData, onSuccess, status, uiOpti
                                                                 </div>
                                                                 <div className="mb-2 pb-2 border-bottom">
                                                                     <small className="text-muted d-block">Tên khoa học loài (Species):</small>
-                                                                    <span className="fw-bold text-dark">{speciesSelect.scientific_name }</span>
+                                                                    <span className="fw-bold text-dark">{speciesSelect.details?.scientific_name || 'Đang tải...' }</span>
                                                                 </div>
                                                                 <div className="mb-2 pb-2 border-bottom">
-                                                                    <small className="text-muted d-block">Chi (Genus):</small>
-                                                                    <span className="fw-medium text-secondary">{speciesSelect.genus_scientific_name || 'Đang tải...'}</span>
+                                                                    <small className="text-muted d-block">Tên Việt Nam loài (Species):</small>
+                                                                    <span className="fw-bold text-dark">{speciesSelect.details?.vietnamese_name || 'Đang tải...' }</span>
                                                                 </div>
-                                                                <div>
-                                                                    <small className="text-muted d-block">Họ (Family):</small>
-                                                                    <span className="fw-medium text-secondary">{speciesSelect.family_scientific_name || 'Đang tải...'}</span>
+                                                                <div className="mb-2 pb-2 border-bottom">
+                                                                <small className="text-muted d-block">Chi (Genus):</small>
+                                                                {/* Thêm d-inline-block và w-100 để text-truncate hoạt động */}
+                                                                <span className="fw-medium text-secondary text-truncate d-inline-block w-100" title={speciesSelect.details?.Genus ? `${speciesSelect.details.Genus.scientific_name} - ${speciesSelect.details.Genus.vietnamese_name}` : ''}>
+                                                                    {speciesSelect.details?.Genus ? 
+                                                                        `${speciesSelect.details.Genus.scientific_name} - ${speciesSelect.details.Genus.vietnamese_name}` 
+                                                                        : 'Đang tải...'
+                                                                    }
+                                                                </span>
+                                                                </div>
+                                                                <div className="mb-2 pb-2 border-bottom">
+                                                                <small className="text-muted d-block">Họ (Family):</small>
+                                                                {/* Thêm d-inline-block và w-100 để text-truncate hoạt động */}
+                                                                <span className="fw-medium text-secondary text-truncate d-inline-block w-100" title={speciesSelect.details?.Genus?.Family ? `${speciesSelect.details.Genus.Family.scientific_name} - ${speciesSelect.details.Genus.Family.vietnamese_name}` : ''}>
+                                                                    {speciesSelect.details?.Genus?.Family ? 
+                                                                        `${speciesSelect.details.Genus.Family.scientific_name} - ${speciesSelect.details.Genus.Family.vietnamese_name}` 
+                                                                        : 'Đang tải...'
+                                                                    }
+                                                                </span>
                                                                 </div>
                                                             </>
                                                         ) : (
@@ -473,7 +487,9 @@ const VarietyModalForm = ({ show, onHide, initialData, onSuccess, status, uiOpti
                              >
                                 <div className="p-3">
                                     <MorphTab register={register} watch={watch} setValue={setValue} status={status} control={control} 
-                                    errors={errors} uiOptions={uiOptions}/>
+                                    errors={errors} uiOptions={uiOptions}
+                                    trigger={trigger}
+                                    />
                                 </div>
                             </Tab>
 

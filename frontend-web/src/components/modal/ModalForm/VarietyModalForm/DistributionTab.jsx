@@ -154,7 +154,7 @@ const DistributionTab = ({ distributions, setDistributions, uiOptions, status })
                                     <td className="text-center">
                                         <div className="d-flex gap-2 justify-content-center">
                                             <OverlayTrigger placement="top" overlay={<Tooltip>Xem chi tiết</Tooltip>}>
-                                                <Button variant="outline-info" size="sm" className="rounded-circle" style={{ width: '30px', height: '30px', padding: 0 }} onClick={() => handleOpenForm('view', idx)} disabled={detailMode}>
+                                                <Button variant="outline-info" size="sm" className="rounded-circle" style={{ width: '30px', height: '30px', padding: 0 }} onClick={() => handleOpenForm('view', idx)} >
                                                     <FaEye size={12}/>
                                                 </Button>
                                             </OverlayTrigger>
@@ -218,7 +218,7 @@ const DistributionTab = ({ distributions, setDistributions, uiOptions, status })
                                                 {...field} 
                                                 options={provinceOptions}
                                                 label="Tỉnh/Quốc gia" 
-                                                placeholder="Chọn hoặc nhập tên mới..."
+                                                placeholder="Chọn hoặc nhập tên..."
                                                 isNewable={false} // Disable inner creation if you want pure DB selection
                                             />
                                         )}

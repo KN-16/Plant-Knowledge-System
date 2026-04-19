@@ -3,7 +3,7 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 // Base axios (KHÔNG interceptor – dùng cho refresh)
-const baseURL = import.meta.env.VITE_API_URL;
+const baseURL = import.meta.env.VITE_API_URL || "/api";
 
 const api = axios.create({
     baseURL,
